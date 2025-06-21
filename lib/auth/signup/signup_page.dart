@@ -167,7 +167,7 @@ class SignupPage extends StatelessWidget {
                                     )
                                         : const Text(
                                       'Sign Up',
-                                      style: TextStyle(fontSize: 16),
+                                      style: TextStyle(fontSize: 16,color: Colors.white),
                                       key: ValueKey('normalText'),
                                     ),
                                   ),

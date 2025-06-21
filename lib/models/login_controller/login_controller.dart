@@ -16,13 +16,14 @@ class LoginController extends ChangeNotifier {
     required String email,
     required String password,
     required BuildContext context,
-  }) async {
+     })
+  async {
     isLoading = true;
     error = null;
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://localhost:8000/api/login'); // IP for Android emulator
+      final url = Uri.parse('http://10.0.2.2:8000/api/login'); // IP for Android emulator
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -34,7 +35,7 @@ class LoginController extends ChangeNotifier {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['token'] != null) {
-        // Save token or user if needed
+
         return true;
       } else {
         error = data['message'] ?? 'Login failed';

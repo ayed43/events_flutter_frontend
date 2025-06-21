@@ -175,6 +175,7 @@ class LoginPage extends StatelessWidget {
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.indigo,
+
                                   padding: const EdgeInsets.symmetric(vertical: 16),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -189,7 +190,7 @@ class LoginPage extends StatelessWidget {
                                   )
                                       : const Text(
                                     'Login',
-                                    style: TextStyle(fontSize: 16),
+                                    style: TextStyle(fontSize: 16,color: Colors.white),
                                     key: ValueKey('normalText'),
                                   ),
                                 ),
