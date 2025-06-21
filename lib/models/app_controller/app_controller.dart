@@ -17,7 +17,14 @@ class AppController with ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, dynamic>? get user => _authBox.get('user');
+  Map<String, dynamic>? get user {
+    final raw = _authBox.get('user');
+    if (raw is Map) {
+      return Map<String, dynamic>.from(raw);
+    }
+    return null;
+  }
+
   String? get token => _authBox.get('token');
 
   bool get isLoggedIn => token != null;
