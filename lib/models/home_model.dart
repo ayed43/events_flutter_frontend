@@ -21,7 +21,7 @@ class HomeController extends ChangeNotifier{
     NotificationsPage(),
     ChatPage()
   ];
-  int currentIndex=1;
+  int currentIndex=0;
 
   buttomNavBar(a){
     this.currentIndex=a;
