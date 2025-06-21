@@ -3,9 +3,11 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:demo/auth/signup/signup_page.dart';
-import 'package:demo/models/login_controller/login_controller.dart';
-import 'package:demo/pages/app.dart';
+
+import '../../models/login_controller/login_controller.dart';
+import '../../pages/app.dart';
+import '../signup/signup_page.dart';
+
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});

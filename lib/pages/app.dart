@@ -1,35 +1,36 @@
+import 'package:demo/models/cache_controller/cache_controller.dart';
+import 'package:demo/pages/second.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:demo/auth/login/login_page.dart';
-import 'package:demo/models/app_controller/app_controller.dart';
-import 'package:demo/models/home_model.dart';
-import 'package:demo/pages/second.dart';
+import '../auth/login/login_page.dart';
+import '../models/app_controller.dart';
+
 
 class App extends StatelessWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<HomeController, AppController>(
+    return Consumer2<AppController, CacheController>(
       builder: (context, home, app, child) {
         final userName = app.user?['name'] ?? 'Guest';
 
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.indigo,
-            title: Text('Welcome $userName'),
+            title: Text('Welcome $userName',style: TextStyle(color: Colors.white),),
             actions: [
               // Theme toggle
-              IconButton(
-                icon: home.isDark
-                    ? const Icon(Icons.sunny)
-                    : const Icon(Icons.dark_mode_outlined),
-                onPressed: home.changeMode,
-              ),
+              // IconButton(
+              //   icon: home.isDark
+              //       ? const Icon(Icons.sunny)
+              //       : const Icon(Icons.dark_mode_outlined),
+              //   onPressed: home.changeMode,
+              // ),
               // Logout
               IconButton(
-                icon: const Icon(Icons.logout),
+                icon: const Icon(Icons.logout,color: Colors.white,),
                 tooltip: 'Logout',
                 onPressed: () {
                   app.logout();
@@ -45,7 +46,7 @@ class App extends StatelessWidget {
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: home.currentIndex,
             onTap: home.buttomNavBar,
-            selectedLabelStyle: const TextStyle(color: Colors.indigo),
+            selectedLabelStyle: const TextStyle(color: Colors.indigo,),
             unselectedLabelStyle: const TextStyle(color: Colors.black),
             selectedItemColor: Colors.indigo,
             unselectedItemColor: Colors.black,

@@ -1,12 +1,14 @@
 
 import 'package:flutter/material.dart';
-import 'package:demo/pages/chat_page.dart';
-import 'package:demo/pages/events_page.dart';
-import 'package:demo/pages/home.dart';
-import 'package:demo/pages/notifications_page.dart';
-import 'package:demo/pages/settings_page.dart';
 
-class HomeController extends ChangeNotifier{
+import '../pages/chat_page.dart';
+import '../pages/events_page.dart';
+import '../pages/home.dart';
+import '../pages/notifications_page.dart';
+import '../pages/settings_page.dart';
+
+
+class AppController extends ChangeNotifier{
 
   bool isDark=false;
   changeMode(){
@@ -16,7 +18,7 @@ class HomeController extends ChangeNotifier{
   }
   List <Widget> pages=[
     HomePage(),
-    EventsPage(),
+    MapsPage(),
     SettingsPage(),
     NotificationsPage(),
     ChatPage()

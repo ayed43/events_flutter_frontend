@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class EventsPage extends StatefulWidget {
-  const EventsPage({Key? key}) : super(key: key);
+class MapsPage extends StatefulWidget {
+  const MapsPage({Key? key}) : super(key: key);
 
   @override
-  _EventsPageState createState() => _EventsPageState();
+  _MapsPageState createState() => _MapsPageState();
 }
 
-class _EventsPageState extends State<EventsPage> {
+class _MapsPageState extends State<MapsPage> {
   late GoogleMapController mapController;
   BitmapDescriptor? customIcon;
 

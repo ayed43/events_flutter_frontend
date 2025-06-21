@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:demo/models/app_controller/app_controller.dart';
+import 'package:demo/models/cache_controller/cache_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -35,7 +35,7 @@ class LoginController extends ChangeNotifier {
 
       if (response.statusCode == 200 && data['token'] != null) {
         // Get the AppController instance from Provider
-        final appController = Provider.of<AppController>(context, listen: false);
+        final appController = Provider.of<CacheController>(context, listen: false);
 
         // Save user info and token in Hive
         appController.saveLoginData(data['user'], data['token']);

@@ -1,13 +1,13 @@
-// app_controller.dart
+// cache_controller.dart
 
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-class AppController with ChangeNotifier {
+class CacheController with ChangeNotifier {
   late Box _authBox;
 
-  AppController() {
+  CacheController() {
     _authBox = Hive.box('authBox');
   }
 

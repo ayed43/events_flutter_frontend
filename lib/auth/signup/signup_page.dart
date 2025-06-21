@@ -1,8 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:demo/auth/login/login_page.dart';
-import 'package:demo/models/signup_controller/signup_controller.dart';
+
+import '../../models/signup_controller/signup_controller.dart';
+import '../login/login_page.dart';
+
 
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
@@ -115,7 +117,7 @@ class SignupPage extends StatelessWidget {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 25),
                               TextFormField(
                                 controller: _passwordController,
                                 obscureText: true,
@@ -129,7 +131,7 @@ class SignupPage extends StatelessWidget {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 25),
                               TextFormField(
                                 controller: _confirmPasswordController,
                                 obscureText: true,

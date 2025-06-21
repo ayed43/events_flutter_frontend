@@ -1,13 +1,15 @@
-import 'package:demo/auth/login/login_page.dart';
-import 'package:demo/models/app_controller/app_controller.dart';
-import 'package:demo/models/home_model.dart';
-import 'package:demo/models/login_controller/login_controller.dart';
-import 'package:demo/models/signup_controller/signup_controller.dart';
-import 'package:demo/pages/app.dart';
 
+
+import 'package:demo/pages/app.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import 'auth/login/login_page.dart';
+import 'models/cache_controller/cache_controller.dart';
+import 'models/app_controller.dart';
+import 'models/login_controller/login_controller.dart';
+import 'models/signup_controller/signup_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +20,10 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AppController()),
+        ChangeNotifierProvider(create: (_) => CacheController()),
         ChangeNotifierProvider(create: (_) => LoginController()),
         ChangeNotifierProvider(create: (_) => SignupController()),
-        ChangeNotifierProvider(create: (_) => HomeController()),
+        ChangeNotifierProvider(create: (_) => AppController()),
       ],
       child: const MyApp(),
     ),
@@ -33,7 +35,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appController = Provider.of<AppController>(context);
+    final appController = Provider.of<CacheController>(context);
 
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.indigo),
