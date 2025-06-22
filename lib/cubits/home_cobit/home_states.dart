@@ -1,8 +1,10 @@
-import 'package:bloc/bloc.dart';
 
-abstract class HomeStates extends Cubit{}
 
-class InitialStates extends HomeStates{}
+abstract class HomeStates {
+
+}
+
+class InitialState extends HomeStates{}
 
 class LoadingState extends HomeStates{}
 
