@@ -24,7 +24,7 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://10.0.2.2:8000/api/login');
+      final url = Uri.parse('http://192.168.196.153:8000/api/login');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},

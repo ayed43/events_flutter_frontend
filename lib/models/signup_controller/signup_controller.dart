@@ -17,7 +17,7 @@ class SignupController extends ChangeNotifier {
     error = null;
     notifyListeners();
 
-    final url = Uri.parse('http://10.0.2.2:8000/api/register'); // Replace with your real URL if needed
+    final url = Uri.parse('http://192.168.196.153:8000/api/register');
 
     try {
       final response = await http.post(

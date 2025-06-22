@@ -2,7 +2,6 @@ import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
 import 'package:demo/models/cache_controller/cache_controller.dart';
 import 'package:demo/pages/second.dart';
-import 'package:demo/services/remote/dio_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -33,11 +32,7 @@ class App extends StatelessWidget {
             },
             builder: (context, state) {
               return    Scaffold(
-                floatingActionButton: FloatingActionButton(onPressed: (){
 
-
-
-                },child: Icon(Icons.add),),
                 appBar: AppBar(
                   backgroundColor: Colors.indigo,
                   title: Text('Welcome $userName',style: TextStyle(color: Colors.white),),

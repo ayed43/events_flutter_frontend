@@ -1,4 +1,5 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:demo/components/home_components/home_components.dart';
 import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
 import 'package:flutter/material.dart';
@@ -12,14 +13,7 @@ class HomePage extends StatelessWidget {
     return BlocConsumer<HomeCubit,HomeStates>(builder: (context, state) {
       return ConditionalBuilder(
           condition: state is !LoadingState,
-          builder: (context) => Center(child: Column(
-
-            children: [
-              // Text('Hello World',style: TextStyle(fontSize: 24),),
-              Text('Hello World2 ',style: TextStyle(fontSize: 24),),
-              Text('Hello World2 ',style: TextStyle(fontSize: 24),),
-            ],
-          ),),
+          builder: (context) => EventWidget(),
           fallback: (context) => Center(child: CircularProgressIndicator()));
     }, listener: (context, state) {
 

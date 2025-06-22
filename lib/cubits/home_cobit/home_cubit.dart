@@ -12,7 +12,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   getData(){
     emit(LoadingState());
-    DioHelper.getData(url: '/home', ).then((value){
+    DioHelper.getData(url: '/api/home', ).then((value){
       emit(SuccessState());
       print(value.data);
 
