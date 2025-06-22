@@ -13,7 +13,7 @@ class HomePage extends StatelessWidget {
     return BlocConsumer<HomeCubit,HomeStates>(builder: (context, state) {
       return ConditionalBuilder(
           condition: state is !LoadingState,
-          builder: (context) => EventWidget(),
+          builder: (context) => CategoryWidget(HomeCubit.get(context).categories),
           fallback: (context) => Center(child: CircularProgressIndicator()));
     }, listener: (context, state) {
 

@@ -2,6 +2,7 @@
 
 import 'package:demo/services/remote/dio_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../api_models/category_model.dart';
 import 'home_states.dart';
 
 class HomeCubit extends Cubit<HomeStates> {
@@ -9,12 +10,15 @@ class HomeCubit extends Cubit<HomeStates> {
 
   static HomeCubit get(context) => BlocProvider.of(context);
 
+  List<CategoryModel> categories = [];
 
   getData(){
     emit(LoadingState());
     DioHelper.getData(url: '/api/home', ).then((value){
       emit(SuccessState());
-      print(value.data);
+      List data = value.data['categories'];
+      categories = data.map((e) => CategoryModel.fromJson(e)).toList();
+      print(categories[0].name);
 
     }).catchError((error){
       emit(ErrorSTate());

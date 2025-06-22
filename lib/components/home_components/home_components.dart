@@ -1,15 +1,16 @@
+import 'package:demo/api_models/category_model.dart';
 import 'package:demo/constants.dart';
 import 'package:flutter/material.dart';
 
-class EventWidget extends StatelessWidget {
-  const EventWidget({super.key});
-
+class CategoryWidget extends StatelessWidget {
+    CategoryWidget(this.categories);
+   List<CategoryModel> categories;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      itemCount: 5,
+      itemCount: categories.length,
       itemBuilder: (context, index) {
         return Container(
           margin: const EdgeInsets.only(bottom: 20),
@@ -31,7 +32,7 @@ class EventWidget extends StatelessWidget {
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.network(
-                  '$serverUrl/storage/icons/photography.jpg',
+                  '$serverUrl/storage/${categories[index].icon}',
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -40,8 +41,7 @@ class EventWidget extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                      'This is an example event description.',
+                  '${categories[index].name}',
                   style: TextStyle(
                     fontSize: 16,
                     height: 1.5,

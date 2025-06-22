@@ -58,6 +58,10 @@ class App extends StatelessWidget {
                     ),
                   ],
                 ),
+                floatingActionButton: FloatingActionButton(onPressed:
+                    () {
+                  HomeCubit.get(context).getData();
+                },child: Icon(Icons.add),),
                 body: home.pages[home.currentIndex],
                 bottomNavigationBar: BottomNavigationBar(
                   currentIndex: home.currentIndex,
