@@ -34,8 +34,8 @@ class App extends StatelessWidget {
               return    Scaffold(
 
                 appBar: AppBar(
-                  backgroundColor: Colors.indigo,
-                  title: Text('Welcome $userName',style: TextStyle(color: Colors.white),),
+
+                  title: Text('Saudi Fastivals App',style: TextStyle(color:Colors.indigo,fontSize: 24,fontWeight: FontWeight.bold),),
                   actions: [
                     // Theme toggle
                     // IconButton(
@@ -45,8 +45,20 @@ class App extends StatelessWidget {
                     //   onPressed: home.changeMode,
                     // ),
                     // Logout
+                IconButton(
+                icon: const Icon(Icons.search,color:Colors.indigo,),
+                tooltip: 'Search',
+                onPressed: () {
+                  // app.logout();
+                  // Navigator.of(context).pushAndRemoveUntil(
+                  //   MaterialPageRoute(builder: (_) =>  LoginPage()),
+                  //       (route) => false,
+                  // );
+                },
+              ),
+
                     IconButton(
-                      icon: const Icon(Icons.logout,color: Colors.white,),
+                      icon: const Icon(Icons.logout,color: Colors.indigo,),
                       tooltip: 'Logout',
                       onPressed: () {
                         app.logout();
@@ -58,16 +70,16 @@ class App extends StatelessWidget {
                     ),
                   ],
                 ),
-                floatingActionButton: FloatingActionButton(onPressed:
-                    () {
-                  HomeCubit.get(context).getData();
-                  final cache = CacheController(); // not recommended without provider unless you pass it
-
-                  final token = cache.token;
-                  print(token);
-                  //     final raw = _authBox.get('user');
-                  //     print(raw);
-                },child: Icon(Icons.add),),
+                // floatingActionButton: FloatingActionButton(onPressed:
+                //     () {
+                //   HomeCubit.get(context).getData();
+                //   final cache = CacheController(); // not recommended without provider unless you pass it
+                //
+                //   final token = cache.token;
+                //   print(token);
+                //   //     final raw = _authBox.get('user');
+                //   //     print(raw);
+                // },child: Icon(Icons.add),),
                 body: home.pages[home.currentIndex],
                 bottomNavigationBar: BottomNavigationBar(
                   currentIndex: home.currentIndex,
@@ -79,7 +91,7 @@ class App extends StatelessWidget {
                   items: const [
                     BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
                     BottomNavigationBarItem(icon: Icon(Icons.party_mode), label: 'Events'),
-                    BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+                    BottomNavigationBarItem(icon: Icon(Icons.location_on_outlined), label: 'Map'),
                     BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
                     BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),
                   ],

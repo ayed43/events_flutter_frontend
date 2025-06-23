@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../pages/chat_page.dart';
-import '../pages/events_page.dart';
+import '../pages/map_page.dart';
 import '../pages/home.dart';
 import '../pages/notifications_page.dart';
 import '../pages/settings_page.dart';
@@ -18,12 +18,12 @@ class AppController extends ChangeNotifier{
   }
   List <Widget> pages=[
     HomePage(),
+    EventsPage(),
     MapsPage(),
-    SettingsPage(),
     NotificationsPage(),
     ChatPage()
   ];
-  int currentIndex=0;
+  int currentIndex=2;
 
   buttomNavBar(a){
     this.currentIndex=a;
