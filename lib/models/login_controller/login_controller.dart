@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:demo/constants.dart';
 import 'package:demo/models/cache_controller/cache_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -24,7 +25,7 @@ class LoginController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = Uri.parse('http://192.168.196.153:8000/api/login');
+      final url = Uri.parse('${serverUrl}/api/login');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -39,6 +40,9 @@ class LoginController extends ChangeNotifier {
 
         // Save user info and token in Hive
         appController.saveLoginData(data['user'], data['token']);
+        final cache = CacheController();
+        final token = cache.token;
+        print(token);
 
         return true;
       } else {

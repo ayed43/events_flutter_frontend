@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:demo/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -17,7 +18,7 @@ class SignupController extends ChangeNotifier {
     error = null;
     notifyListeners();
 
-    final url = Uri.parse('http://192.168.196.153:8000/api/register');
+    final url = Uri.parse('${serverUrl}/api/register');
 
     try {
       final response = await http.post(

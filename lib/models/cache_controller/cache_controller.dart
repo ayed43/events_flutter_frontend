@@ -1,9 +1,12 @@
 // cache_controller.dart
 
 
+import 'package:demo/services/remote/dio_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+
+import '../../constants.dart';
 class CacheController with ChangeNotifier {
    late Box _authBox;
 
@@ -29,8 +32,30 @@ class CacheController with ChangeNotifier {
 
   bool get isLoggedIn => token != null;
 
-  void logout() {
-    _authBox.clear();
-    notifyListeners();
-  }
+   Future<void> logout() async {
+     final cache = CacheController();
+     final token = cache.token;
+
+     final url = Uri.parse('${serverUrl}/api/logout');
+
+     try {
+       final response = await http.post(
+         url,
+         headers: {
+           'Authorization': 'Bearer ${token}',
+           'Accept': 'application/json',
+         },
+       );
+
+       if (response.statusCode == 200) {
+         print('Logout successful: ${response.body}');
+
+       } else {
+         print('Logout failed: ${response.statusCode} - ${response.body}');
+       }
+     } catch (e) {
+       print('Logout error: $e');
+     }
+   }
+
 }
