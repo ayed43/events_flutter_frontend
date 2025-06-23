@@ -1,151 +1,237 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:demo/cubits/home_cobit/home_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:demo/cubits/home_cobit/home_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../constants.dart';
 
 class MapsPage extends StatefulWidget {
-  const MapsPage({Key? key}) : super(key: key);
+  const MapsPage({super.key});
 
   @override
-  _MapsPageState createState() => _MapsPageState();
+  State<MapsPage> createState() => _MapsPageState();
 }
 
 class _MapsPageState extends State<MapsPage> {
   late GoogleMapController mapController;
-  BitmapDescriptor? customIcon;
-
-  final List<Map<String, dynamic>> _dummyEvents = [
-    {
-      "title": "Tech Meetup",
-      "description": "Innovations in AI & IoT",
-      "seats_available": 25,
-      "lat": 21.5433,
-      "long": 39.1740,
-    },
-    {
-      "title": "Startup Expo",
-      "description": "Young minds pitch ideas",
-      "seats_available": 10,
-      "lat": 21.5438,
-      "long": 39.1743,
-    },
-    {
-      "title": "Hackathon Night",
-      "description": "24hr coding challenge",
-      "seats_available": 45,
-      "lat": 21.5441,
-      "long": 39.1745,
-    },
-    {
-      "title": "Design Workshop",
-      "description": "UI/UX fundamentals",
-      "seats_available": 15,
-      "lat": 21.5435,
-      "long": 39.1738,
-    },
-    {
-      "title": "Blockchain Seminar",
-      "description": "Future of decentralized tech",
-      "seats_available": 30,
-      "lat": 21.5439,
-      "long": 39.1741,
-    },
-    {
-      "title": "Networking Mixer",
-      "description": "Connect with tech professionals",
-      "seats_available": 50,
-      "lat": 21.5440,
-      "long": 39.1739,
-    },
-    {
-      "title": "VR Demo Day",
-      "description": "Experience virtual reality",
-      "seats_available": 20,
-      "lat": 21.5436,
-      "long": 39.1742,
-    },
-    {
-      "title": "Data Science Talk",
-      "description": "Machine learning trends",
-      "seats_available": 35,
-      "lat": 21.5437,
-      "long": 39.1744,
-    },
-    {
-      "title": "Coding Bootcamp",
-      "description": "Learn Python basics",
-      "seats_available": 40,
-      "lat": 21.5434,
-      "long": 39.1737,
-    },
-    {
-      "title": "Tech Career Fair",
-      "description": "Meet top employers",
-      "seats_available": 100,
-      "lat": 21.5442,
-      "long": 39.1746,
-    },
-  ];
+  String? selectedEventName;
+  String? selectedEventDescription;
+  LatLng? selectedEventPosition;
+  Set<Marker> markers = {};
 
   @override
   void initState() {
     super.initState();
-    _loadCustomIcon();
+    debugPrint('Initializing map...');
+    _loadMarkersIfReady();
   }
 
-  Future<void> _loadCustomIcon() async {
-    customIcon = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(size: Size(32, 32), devicePixelRatio: 1.0),
-      'assets/images/event_marker.png',
-    );
-    setState(() {}); // Trigger rebuild with the loaded icon
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-    _zoomToFitAllMarkers();
-  }
-
-  Set<Marker> _buildMarkers() {
-    return _dummyEvents.map((event) {
-      return Marker(
-        markerId: MarkerId(event['title']),
-        position: LatLng(event['lat'], event['long']),
-        infoWindow: InfoWindow(
-          title: event['title'],
-          snippet:
-          "${event['description']} — Seats: ${event['seats_available']}",
-        ),
-        icon: customIcon ?? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-      );
-    }).toSet();
-  }
-
-  void _zoomToFitAllMarkers() {
-    if (_dummyEvents.isEmpty) return;
-
-    final latitudes = _dummyEvents.map((e) => e['lat']);
-    final longitudes = _dummyEvents.map((e) => e['long']);
-
-    final bounds = LatLngBounds(
-      southwest: LatLng(latitudes.reduce((a, b) => a < b ? a : b),
-          longitudes.reduce((a, b) => a < b ? a : b)),
-      northeast: LatLng(latitudes.reduce((a, b) => a > b ? a : b),
-          longitudes.reduce((a, b) => a > b ? a : b)),
-    );
-
-    mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 60));
+  void _loadMarkersIfReady() {
+    final cubit = HomeCubit.get(context);
+    if (cubit.state is SuccessState) {
+      debugPrint('Loading markers immediately');
+      _loadMarkers();
+    } else {
+      debugPrint('Waiting for events to load...');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      onMapCreated: _onMapCreated,
-      initialCameraPosition: const CameraPosition(
-        target: LatLng(21.5433, 39.1740),
-        zoom: 15,
+    return BlocListener<HomeCubit, HomeStates>(
+      listener: (context, state) {
+        if (state is SuccessState) {
+          debugPrint('Cubit updated with events, reloading markers');
+          _loadMarkers();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Events Map'),
+        ),
+        body: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(24.7136, 46.6753), // Default to Riyadh
+                zoom: 10,
+              ),
+              markers: markers,
+              onMapCreated: (controller) {
+                setState(() {
+                  mapController = controller;
+                });
+              },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+            ),
+            if (selectedEventName != null && selectedEventPosition != null)
+              Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: _buildEventInfoCard(),
+              ),
+          ],
+        ),
       ),
-      markers: _buildMarkers(),
-      myLocationEnabled: true,
-      myLocationButtonEnabled: true,
     );
+  }
+
+  Future<void> _loadMarkers() async {
+    final cubit = HomeCubit.get(context);
+    if (cubit.state is! SuccessState) return;
+
+    final events = HomeCubit.get(context).events;
+    debugPrint('Loading ${events.length} events');
+
+    final newMarkers = await _createMarkers(events);
+    setState(() {
+      markers = newMarkers;
+    });
+  }
+
+  Widget _buildEventInfoCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              selectedEventName!,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              selectedEventDescription!,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<Set<Marker>> _createMarkers(List<dynamic> events) async {
+    Set<Marker> markers = {};
+
+    for (var event in events) {
+      try {
+        debugPrint('Creating marker for: ${event.name}');
+        final icon = await _getMarkerIcon(event);
+        markers.add(
+          Marker(
+            markerId: MarkerId(event.id.toString()),
+            position: LatLng(event.latitude, event.longitude),
+            infoWindow: InfoWindow(
+              title: event.name,
+              snippet: event.description,
+            ),
+            onTap: () {
+              setState(() {
+                selectedEventName = event.name;
+                selectedEventDescription = event.description;
+                selectedEventPosition = LatLng(event.latitude, event.longitude);
+              });
+            },
+            icon: icon,
+          ),
+        );
+      } catch (e) {
+        debugPrint('Error creating marker: $e');
+        markers.add(
+          Marker(
+            markerId: MarkerId(event.id.toString()),
+            position: LatLng(event.latitude, event.longitude),
+            infoWindow: InfoWindow(
+              title: event.name,
+              snippet: event.description,
+            ),
+          ),
+        );
+      }
+    }
+    debugPrint('Created ${markers.length} markers');
+    return markers;
+  }
+
+  Future<BitmapDescriptor> _getMarkerIcon(dynamic event) async {
+    try {
+      const size = 150;
+      final pictureRecorder = ui.PictureRecorder();
+      final canvas = Canvas(pictureRecorder);
+      final radius = size / 2;
+      final paint = Paint()..color = Colors.blue;
+
+      canvas.drawCircle(Offset(radius, radius), radius, paint);
+
+      try {
+        final imageUrl = '$serverUrl/storage/${event.image}';
+        final bytes = await _loadNetworkImageBytes(imageUrl);
+        if (bytes != null) {
+          final image = await decodeImageFromList(bytes);
+          final RRect oval = RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
+            Radius.circular(radius),
+          );
+          canvas.clipRRect(oval);
+          canvas.drawImageRect(
+            image,
+            Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+            Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
+            Paint(),
+          );
+        } else {
+          _drawIcon(canvas, radius);
+        }
+      } catch (e) {
+        _drawIcon(canvas, radius);
+      }
+
+      final picture = pictureRecorder.endRecording();
+      final image = await picture.toImage(size, size);
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
+    } catch (e) {
+      return BitmapDescriptor.defaultMarker;
+    }
+  }
+
+  void _drawIcon(Canvas canvas, double radius) {
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    textPainter.text = TextSpan(
+      text: String.fromCharCode(Icons.event.codePoint),
+      style: TextStyle(
+        fontSize: radius,
+        fontFamily: Icons.event.fontFamily,
+        color: Colors.white,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(radius - textPainter.width / 2, radius - textPainter.height / 2),
+    );
+  }
+
+  Future<Uint8List?> _loadNetworkImageBytes(String imageUrl) async {
+    try {
+      final response = await NetworkAssetBundle(Uri.parse(imageUrl)).load(imageUrl);
+      return response.buffer.asUint8List();
+    } catch (e) {
+      return null;
+    }
   }
 }
