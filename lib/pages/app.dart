@@ -45,17 +45,7 @@ class App extends StatelessWidget {
                     //   onPressed: home.changeMode,
                     // ),
                     // Logout
-                IconButton(
-                icon: const Icon(Icons.search,color:Colors.indigo,),
-                tooltip: 'Search',
-                onPressed: () {
-                  // app.logout();
-                  // Navigator.of(context).pushAndRemoveUntil(
-                  //   MaterialPageRoute(builder: (_) =>  LoginPage()),
-                  //       (route) => false,
-                  // );
-                },
-              ),
+
 
                     IconButton(
                       icon: const Icon(Icons.logout,color: Colors.indigo,),
