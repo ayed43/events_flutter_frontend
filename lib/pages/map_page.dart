@@ -41,6 +41,14 @@ class _MapsPageState extends State<MapsPage> {
     }
   }
 
+  void _hideEventInfo() {
+    setState(() {
+      selectedEventName = null;
+      selectedEventDescription = null;
+      selectedEventPosition = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<HomeCubit, HomeStates>(
@@ -54,30 +62,66 @@ class _MapsPageState extends State<MapsPage> {
         appBar: AppBar(
           title: const Text('Events Map'),
         ),
-        body: Stack(
-          children: [
-            GoogleMap(
-              initialCameraPosition: const CameraPosition(
-                target: LatLng(24.7136, 46.6753), // Default to Riyadh
-                zoom: 10,
+        body: BlocBuilder<HomeCubit, HomeStates>(
+          builder: (context, state) {
+            return GestureDetector(
+              onTap: _hideEventInfo,
+              child: Stack(
+                children: [
+                  GoogleMap(
+                    initialCameraPosition: const CameraPosition(
+                      target: LatLng(24.7136, 46.6753), // Default to Riyadh
+                      zoom: 10,
+                    ),
+                    markers: markers,
+                    onMapCreated: (controller) {
+                      setState(() {
+                        mapController = controller;
+                      });
+                      // Try to load markers when map is ready
+                      if (state is SuccessState) {
+                        debugPrint('Map created and events ready, loading markers');
+                        _loadMarkers();
+                      }
+                    },
+                    onTap: (LatLng position) {
+                      _hideEventInfo();
+                    },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
+                  ),
+                  // Loading indicator when events are still loading
+                  if (state is LoadingState)
+                    const Center(
+                      child: Card(
+                        elevation: 4,
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 12),
+                              Text('Loading events...'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (selectedEventName != null && selectedEventPosition != null)
+                    Positioned(
+                      bottom: 20,
+                      left: 20,
+                      right: 20,
+                      child: GestureDetector(
+                        onTap: () {}, // Prevent hiding when tapping on the card
+                        child: _buildEventInfoCard(),
+                      ),
+                    ),
+                ],
               ),
-              markers: markers,
-              onMapCreated: (controller) {
-                setState(() {
-                  mapController = controller;
-                });
-              },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: true,
-            ),
-            if (selectedEventName != null && selectedEventPosition != null)
-              Positioned(
-                bottom: 20,
-                left: 20,
-                right: 20,
-                child: _buildEventInfoCard(),
-              ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -98,27 +142,67 @@ class _MapsPageState extends State<MapsPage> {
 
   Widget _buildEventInfoCard() {
     return Card(
-      elevation: 4,
+      elevation: 8,
+      shadowColor: Colors.black.withOpacity(0.3),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              selectedEventName!,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Colors.grey.shade50,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      selectedEventName!,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _hideEventInfo,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              selectedEventDescription!,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                selectedEventDescription!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.black54,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -169,35 +253,59 @@ class _MapsPageState extends State<MapsPage> {
 
   Future<BitmapDescriptor> _getMarkerIcon(dynamic event) async {
     try {
-      const size = 150;
+      const size = 160;
+      const borderWidth = 6.0;
       final pictureRecorder = ui.PictureRecorder();
       final canvas = Canvas(pictureRecorder);
       final radius = size / 2;
-      final paint = Paint()..color = Colors.blue;
 
-      canvas.drawCircle(Offset(radius, radius), radius, paint);
+      // Draw outer white border
+      final outerPaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(radius, radius), radius, outerPaint);
+
+      // Draw inner shadow border
+      final shadowPaint = Paint()
+        ..color = Colors.black.withOpacity(0.1)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(radius, radius), radius - 2, shadowPaint);
+
+      // Draw main background
+      final backgroundPaint = Paint()
+        ..color = Colors.blue.shade400
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(radius, radius), radius - borderWidth, backgroundPaint);
 
       try {
         final imageUrl = '$serverUrl/storage/${event.image}';
         final bytes = await _loadNetworkImageBytes(imageUrl);
         if (bytes != null) {
           final image = await decodeImageFromList(bytes);
+
+          // Create clipping path for the image (smaller circle inside the border)
+          final imageRadius = radius - borderWidth;
           final RRect oval = RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
-            Radius.circular(radius),
+            Rect.fromLTWH(borderWidth, borderWidth,
+                (size - borderWidth * 2).toDouble(),
+                (size - borderWidth * 2).toDouble()),
+            Radius.circular(imageRadius),
           );
           canvas.clipRRect(oval);
+
+          // Draw the image
           canvas.drawImageRect(
             image,
             Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-            Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
-            Paint(),
+            Rect.fromLTWH(borderWidth, borderWidth,
+                size - borderWidth * 2, size - borderWidth * 2),
+            Paint()..filterQuality = FilterQuality.high,
           );
         } else {
-          _drawIcon(canvas, radius);
+          _drawEnhancedIcon(canvas, radius, borderWidth);
         }
       } catch (e) {
-        _drawIcon(canvas, radius);
+        _drawEnhancedIcon(canvas, radius, borderWidth);
       }
 
       final picture = pictureRecorder.endRecording();
@@ -209,12 +317,43 @@ class _MapsPageState extends State<MapsPage> {
     }
   }
 
-  void _drawIcon(Canvas canvas, double radius) {
+  void _drawEnhancedIcon(Canvas canvas, double radius, double borderWidth) {
+    // Create gradient background for icon
+    final rect = Rect.fromLTWH(borderWidth, borderWidth,
+        (radius * 2) - (borderWidth * 2),
+        (radius * 2) - (borderWidth * 2));
+    final gradient = ui.Gradient.linear(
+      Offset(rect.left, rect.top),
+      Offset(rect.right, rect.bottom),
+      [Colors.blue.shade300, Colors.blue.shade600],
+    );
+
+    final gradientPaint = Paint()..shader = gradient;
+    canvas.drawCircle(Offset(radius, radius), radius - borderWidth, gradientPaint);
+
+    // Draw icon with shadow effect
+    final shadowTextPainter = TextPainter(textDirection: TextDirection.ltr);
+    shadowTextPainter.text = TextSpan(
+      text: String.fromCharCode(Icons.event.codePoint),
+      style: TextStyle(
+        fontSize: radius * 0.8,
+        fontFamily: Icons.event.fontFamily,
+        color: Colors.black.withOpacity(0.2),
+      ),
+    );
+    shadowTextPainter.layout();
+    shadowTextPainter.paint(
+      canvas,
+      Offset(radius - shadowTextPainter.width / 2 + 2,
+          radius - shadowTextPainter.height / 2 + 2),
+    );
+
+    // Draw main icon
     final textPainter = TextPainter(textDirection: TextDirection.ltr);
     textPainter.text = TextSpan(
       text: String.fromCharCode(Icons.event.codePoint),
       style: TextStyle(
-        fontSize: radius,
+        fontSize: radius * 0.8,
         fontFamily: Icons.event.fontFamily,
         color: Colors.white,
       ),
