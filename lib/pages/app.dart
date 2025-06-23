@@ -4,6 +4,7 @@ import 'package:demo/models/cache_controller/cache_controller.dart';
 import 'package:demo/pages/second.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as _authBox;
 import 'package:provider/provider.dart';
 
 import '../auth/login/login_page.dart';
@@ -61,6 +62,8 @@ class App extends StatelessWidget {
                 floatingActionButton: FloatingActionButton(onPressed:
                     () {
                   HomeCubit.get(context).getData();
+                  //     final raw = _authBox.get('user');
+                  //     print(raw);
                 },child: Icon(Icons.add),),
                 body: home.pages[home.currentIndex],
                 bottomNavigationBar: BottomNavigationBar(

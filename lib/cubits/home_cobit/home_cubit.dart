@@ -14,7 +14,11 @@ class HomeCubit extends Cubit<HomeStates> {
 
   getData(){
     emit(LoadingState());
-    DioHelper.getData(url: '/api/home', ).then((value){
+    DioHelper.getData(url: '/api/home',
+    headers: {
+       'Authorization':'Bearer 8|lSKOmYGc4VtvBJp4uhPEsyPjr7VxkqGiLZo2dXkt2ae05860'
+    }
+    ).then((value){
       emit(SuccessState());
       List data = value.data['categories'];
       categories = data.map((e) => CategoryModel.fromJson(e)).toList();

@@ -1,25 +1,27 @@
-
-
 import 'package:demo/constants.dart';
 import 'package:dio/dio.dart';
 
-class DioHelper{
-  static Dio dio=Dio();
-   static init(){
-     dio = Dio(
+class DioHelper {
+  static Dio dio = Dio();
 
-  BaseOptions(
-    baseUrl:serverUrl ,
+  static init() {
+    dio = Dio(
+      BaseOptions(
+        baseUrl: serverUrl,
+        receiveDataWhenStatusError: true,
+      ),
+    );
+  }
 
-    receiveDataWhenStatusError: true));
-   }
   static Future<Response> getData({
-      required String url,
-       query
-}) async
-   {
-    return await dio.get(url,queryParameters: query);
-
-   }
-
+    required String url,
+    Map<String, dynamic>? query,
+    Map<String, dynamic>? headers,
+  }) async {
+    return await dio.get(
+      url,
+      queryParameters: query,
+      options: Options(headers: headers),
+    );
+  }
 }

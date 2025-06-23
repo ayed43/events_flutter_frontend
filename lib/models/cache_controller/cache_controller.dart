@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 class CacheController with ChangeNotifier {
-  late Box _authBox;
+   late Box _authBox;
 
   CacheController() {
     _authBox = Hive.box('authBox');
@@ -17,7 +17,7 @@ class CacheController with ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, dynamic>? get user {
+   Map<String, dynamic>? get user {
     final raw = _authBox.get('user');
     if (raw is Map) {
       return Map<String, dynamic>.from(raw);
