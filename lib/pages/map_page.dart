@@ -58,71 +58,66 @@ class _MapsPageState extends State<MapsPage> {
           _loadMarkers();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Events Map'),
-        ),
-        body: BlocBuilder<HomeCubit, HomeStates>(
-          builder: (context, state) {
-            return GestureDetector(
-              onTap: _hideEventInfo,
-              child: Stack(
-                children: [
-                  GoogleMap(
-                    initialCameraPosition: const CameraPosition(
-                      target: LatLng(24.7136, 46.6753), // Default to Riyadh
-                      zoom: 10,
-                    ),
-                    markers: markers,
-                    onMapCreated: (controller) {
-                      setState(() {
-                        mapController = controller;
-                      });
-                      // Try to load markers when map is ready
-                      if (state is SuccessState) {
-                        debugPrint('Map created and events ready, loading markers');
-                        _loadMarkers();
-                      }
-                    },
-                    onTap: (LatLng position) {
-                      _hideEventInfo();
-                    },
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
+      child: BlocBuilder<HomeCubit, HomeStates>(
+        builder: (context, state) {
+          return GestureDetector(
+            onTap: _hideEventInfo,
+            child: Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: const CameraPosition(
+                    target: LatLng(24.7136, 46.6753), // Default to Riyadh
+                    zoom: 10,
                   ),
-                  // Loading indicator when events are still loading
-                  if (state is LoadingState)
-                    const Center(
-                      child: Card(
-                        elevation: 4,
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(),
-                              SizedBox(height: 12),
-                              Text('Loading events...'),
-                            ],
-                          ),
+                  markers: markers,
+                  onMapCreated: (controller) {
+                    setState(() {
+                      mapController = controller;
+                    });
+                    // Try to load markers when map is ready
+                    if (state is SuccessState) {
+                      debugPrint('Map created and events ready, loading markers');
+                      _loadMarkers();
+                    }
+                  },
+                  onTap: (LatLng position) {
+                    _hideEventInfo();
+                  },
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+                // Loading indicator when events are still loading
+                if (state is LoadingState)
+                  const Center(
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 12),
+                            Text('Loading events...'),
+                          ],
                         ),
                       ),
                     ),
-                  if (selectedEventName != null && selectedEventPosition != null)
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      right: 20,
-                      child: GestureDetector(
-                        onTap: () {}, // Prevent hiding when tapping on the card
-                        child: _buildEventInfoCard(),
-                      ),
+                  ),
+                if (selectedEventName != null && selectedEventPosition != null)
+                  Positioned(
+                    bottom: 20,
+                    left: 20,
+                    right: 20,
+                    child: GestureDetector(
+                      onTap: () {}, // Prevent hiding when tapping on the card
+                      child: _buildEventInfoCard(),
                     ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

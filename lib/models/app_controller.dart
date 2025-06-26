@@ -17,8 +17,9 @@ class AppController extends ChangeNotifier{
 
   }
   List <Widget> pages=[
-    HomePage(),
+
     EventsPage(),
+    HomePage(),
     MapsPage(),
     NotificationsPage(),
     ChatPage()
