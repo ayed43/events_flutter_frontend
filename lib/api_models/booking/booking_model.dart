@@ -17,8 +17,8 @@ class Booking {
     this.status,
     this.updatedAt,
     this.createdAt,
-    this.id,
-    this.event
+    this.id
+
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -29,8 +29,8 @@ class Booking {
       status: json['booking']?['status'],
       updatedAt: json['booking']?['updated_at'],
       createdAt: json['booking']?['created_at'],
-      id: json['booking']?['id'],
-      event: EventModel.fromJson(json['even'])
+      id: json['booking']?['id']
+
     );
   }
 

@@ -24,7 +24,7 @@ class AppController extends ChangeNotifier{
     BookingsPage(),
     ChatPage()
   ];
-  int currentIndex=3;
+  int currentIndex=0;
 
   buttomNavBar(a){
     this.currentIndex=a;

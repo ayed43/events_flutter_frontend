@@ -1,6 +1,10 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:demo/api_models/events_model.dart';
 import 'package:demo/cubits/booking_cubit/booking_cubit.dart';
 import 'package:demo/cubits/booking_cubit/booking_states.dart';
+import 'package:demo/cubits/home_cobit/home_cubit.dart';
+import 'package:demo/cubits/home_cobit/home_states.dart';
+import 'package:demo/pages/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -16,8 +20,10 @@ class DetailsPage extends StatelessWidget {
     return BlocProvider(create: (context) => BookingCubit(),
     child: BlocConsumer<BookingCubit,BookingStates>(builder: (context, state) {
       return Scaffold(
+
         backgroundColor: Colors.grey[50],
         body: CustomScrollView(
+
           slivers: [
             // Hero Image with App Bar
             SliverAppBar(
@@ -289,6 +295,10 @@ class DetailsPage extends StatelessWidget {
           child: FloatingActionButton.extended(
             onPressed: () {
               BookingCubit.get(context).bookEvent(event.id);
+             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+               return App();
+             },));
+
             },
             backgroundColor: Colors.indigo,
             elevation: 8,
@@ -309,7 +319,28 @@ class DetailsPage extends StatelessWidget {
       );
 
     }, listener: (context, state) {
+       if (state is BookingSuccessState){
+         final snackBar = SnackBar(
+           elevation: 0,
+           behavior: SnackBarBehavior.floating,
+           backgroundColor: Colors.transparent,
+           margin: const EdgeInsets.fromLTRB(16, 50, 16, 0), // تحركه للأعلى (50 من الأعلى)
+           content: AwesomeSnackbarContent(
+             title: 'Congrats!',
+             message:  'Booking done successfully',
+             contentType: ContentType.success,
+           ),
+           duration: const Duration(seconds: 3),
+           shape: RoundedRectangleBorder(
+             borderRadius: BorderRadius.circular(12),
+           ),
+         );
 
+         ScaffoldMessenger.of(context)
+           ..hideCurrentSnackBar()
+           ..showSnackBar(snackBar);
+
+       }
     },),
     );
   }

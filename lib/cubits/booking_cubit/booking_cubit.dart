@@ -12,13 +12,14 @@ class BookingCubit extends Cubit<BookingStates>{
 
   static BookingCubit get(context) => BlocProvider.of(context);
 
+
+
   void bookEvent(int eventId) {
     emit(BookingLoadingState());
-
     final cache = CacheController();
     final token = cache.token;
 
-    Booking booking = Booking();
+    dynamic booking;
     DioHelper.postData(
       url: '${serverUrl}/api/booking',
       data: {'event_id': eventId},
@@ -30,6 +31,8 @@ class BookingCubit extends Cubit<BookingStates>{
       // Print the message from response
       print(booking.message); // e.g., "Booking created successfully."
       emit(BookingSuccessState());
+
+
 
     }).catchError((error) {
       emit(BookingErrorState());
