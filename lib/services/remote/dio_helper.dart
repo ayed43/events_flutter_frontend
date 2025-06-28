@@ -17,11 +17,17 @@ class DioHelper {
     required String url,
     Map<String, dynamic>? query,
     Map<String, dynamic>? headers,
+    String? bearerToken, // ✅ أضفنا هذا
   }) async {
+    final mergedHeaders = {
+      ...?headers,
+      if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+    };
+
     return await dio.get(
       url,
       queryParameters: query,
-      options: Options(headers: headers),
+      options: Options(headers: mergedHeaders),
     );
   }
 

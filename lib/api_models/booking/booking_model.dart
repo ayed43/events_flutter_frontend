@@ -1,3 +1,5 @@
+import 'package:demo/api_models/events_model.dart';
+
 class Booking {
   String? message;
   int? userId;
@@ -6,6 +8,7 @@ class Booking {
   String? updatedAt;
   String? createdAt;
   int? id;
+  EventModel ?event;
 
   Booking({
     this.message,
@@ -15,6 +18,7 @@ class Booking {
     this.updatedAt,
     this.createdAt,
     this.id,
+    this.event
   });
 
   factory Booking.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,7 @@ class Booking {
       updatedAt: json['booking']?['updated_at'],
       createdAt: json['booking']?['created_at'],
       id: json['booking']?['id'],
+      event: EventModel.fromJson(json['even'])
     );
   }
 
