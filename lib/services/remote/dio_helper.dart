@@ -24,4 +24,25 @@ class DioHelper {
       options: Options(headers: headers),
     );
   }
+
+  static Future<Response> postData({
+    required String url,
+    Map<String, dynamic>? data,
+    Map<String, dynamic>? query,
+    Map<String, dynamic>? headers,
+    String? bearerToken,
+  }) async {
+    final mergedHeaders = {
+      ...?headers,
+      if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+      'Content-Type': 'application/json',
+    };
+
+    return await dio.post(
+      url,
+      data: data,
+      queryParameters: query,
+      options: Options(headers: mergedHeaders),
+    );
+  }
 }
