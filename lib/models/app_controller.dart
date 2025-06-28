@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../pages/chat_page.dart';
 import '../pages/map_page.dart';
 import '../pages/home.dart';
-import '../pages/notifications_page.dart';
+import '../pages/bookings_page.dart';
 import '../pages/settings_page.dart';
 
 
@@ -21,7 +21,7 @@ class AppController extends ChangeNotifier{
     EventsPage(),
     HomePage(),
     MapsPage(),
-    NotificationsPage(),
+    BookingsPage(),
     ChatPage()
   ];
   int currentIndex=2;

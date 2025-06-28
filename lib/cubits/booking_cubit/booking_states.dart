@@ -3,8 +3,8 @@ abstract class BookingStates{}
 
 class InitialBookingState extends BookingStates{}
 
-class MakeBookingState extends BookingStates {}
+class BookingLoadingState extends BookingStates {}
 
-class SuccessBookingState extends BookingStates{}
+class BookingSuccessState extends BookingStates{}
 
-class ErrorBookingState extends BookingStates{}
+class BookingErrorState extends BookingStates{}

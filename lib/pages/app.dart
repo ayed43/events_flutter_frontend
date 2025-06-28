@@ -82,7 +82,7 @@ class App extends StatelessWidget {
                     BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
                     BottomNavigationBarItem(icon: Icon(Icons.party_mode), label: 'Events'),
                     BottomNavigationBarItem(icon: Icon(Icons.location_on_outlined), label: 'Map'),
-                    BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
+                    BottomNavigationBarItem(icon: Icon(Icons.my_location_rounded), label: 'Bookings'),
                     BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chats'),
                   ],
                 ),
