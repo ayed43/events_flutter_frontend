@@ -168,43 +168,59 @@ class LoginPage extends StatelessWidget {
                             const SizedBox(height: 30),
                             SizedBox(
                               width: double.infinity,
-                              child:ElevatedButton(
-                                onPressed: loginController.isLoading
-                                    ? null
-                                    : () {
-                                  FocusScope.of(context).unfocus();  // هذا يخفي الكيبورد
-                                  _submitForm(context, loginController);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.indigo,
-
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xE32E568E), // Indigo 400
+                                      Color(0xFF3949AB), // Indigo 600
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  child: loginController.isLoading
-                                      ? const Text(
-                                    'Logging in...',
-                                    key: ValueKey('loadingText'),
-                                  )
-                                      : const Text(
-                                    'Login',
-                                    style: TextStyle(fontSize: 16,color: Colors.white),
-                                    key: ValueKey('normalText'),
+                                child: ElevatedButton(
+                                  onPressed: loginController.isLoading
+                                      ? null
+                                      : () {
+                                    FocusScope.of(context).unfocus();
+                                    _submitForm(context, loginController);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: loginController.isLoading
+                                        ? const Text(
+                                      'Logging in...',
+                                      key: ValueKey('loadingText'),
+                                      style: TextStyle(color: Colors.white, fontSize: 16),
+                                    )
+                                        : const Text(
+                                      'Login',
+                                      key: ValueKey('normalText'),
+                                      style: TextStyle(color: Colors.white, fontSize: 16,
+                                      fontWeight: FontWeight.bold
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-
                             ),
+
                             const SizedBox(height: 20),
                             TextButton(
                               onPressed: () => _goToSignup(context),
                               child: const Text(
                                 "Don't have an account? Sign up",
-                                style: TextStyle(color: Colors.indigo),
+                                style: TextStyle(    fontWeight: FontWeight.bold,color: Colors.indigo),
                               ),
                             ),
                           ],

@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  auto_size_text:
+    dependency: transitive
+    description:
+      name: auto_size_text
+      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   awesome_snackbar_content:
     dependency: "direct main"
     description:
@@ -333,6 +341,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  onboarding_screen:
+    dependency: "direct main"
+    description:
+      name: onboarding_screen
+      sha256: d40bb541a5c4386beeaa93bb8ed1857386d2ec0a355982a88a27cfd298e1f6cb
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   path:
     dependency: transitive
     description:

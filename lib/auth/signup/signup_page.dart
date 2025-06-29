@@ -149,38 +149,56 @@ class SignupPage extends StatelessWidget {
 
                               SizedBox(
                                 width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: signupController.isLoading
-                                      ? null
-                                      : () => _submitSignup(context, signupController),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.indigo,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFF5C6BC0), // Indigo 400
+                                        Color(0xFF3949AB), // Indigo 600
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: signupController.isLoading
-                                        ? const Text(
-                                      'Please wait...',
-                                      key: ValueKey('loadingText'),
-                                    )
-                                        : const Text(
-                                      'Sign Up',
-                                      style: TextStyle(fontSize: 16,color: Colors.white),
-                                      key: ValueKey('normalText'),
+                                  child: ElevatedButton(
+                                    onPressed: signupController.isLoading
+                                        ? null
+                                        : () => _submitSignup(context, signupController),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 300),
+                                      child: signupController.isLoading
+                                          ? const Text(
+                                        'Please wait...',
+                                        key: ValueKey('loadingText'),
+                                        style: TextStyle(fontSize: 16, color: Colors.white),
+                                      )
+                                          : const Text(
+                                        'Sign Up',
+                                        key: ValueKey('normalText'),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16, color: Colors.white),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
+
                               const SizedBox(height: 20),
                               TextButton(
                                 onPressed: () => _goToLogin(context),
                                 child: const Text(
                                   'Already have an account? Login',
-                                  style: TextStyle(color: Colors.indigo),
+                                  style: TextStyle(   fontWeight: FontWeight.bold,color: Colors.indigo),
                                 ),
                               ),
                             ],
