@@ -41,7 +41,11 @@ class MyApp extends StatelessWidget {
     final appController = Provider.of<CacheController>(context);
 
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.indigo),
+      theme: ThemeData(primarySwatch: Colors.indigo,
+        fontFamily: 'Ubuntu'
+
+
+      ),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       home: appController.isLoggedIn ? const App() :  LoginPage(),

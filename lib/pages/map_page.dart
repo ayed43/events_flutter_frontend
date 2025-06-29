@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:demo/cubits/home_cobit/home_states.dart';
+import 'package:demo/pages/details_page/details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -22,6 +23,7 @@ class _MapsPageState extends State<MapsPage> {
   String? selectedEventName;
   String? selectedEventDescription;
   LatLng? selectedEventPosition;
+  dynamic selectedEvent; // Store the full event object
   Set<Marker> markers = {};
 
   @override
@@ -46,7 +48,16 @@ class _MapsPageState extends State<MapsPage> {
       selectedEventName = null;
       selectedEventDescription = null;
       selectedEventPosition = null;
+      selectedEvent = null; // Clear the selected event
     });
+  }
+
+  void _onJoinUsPressed() {
+    if (selectedEvent != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return DetailsPage(selectedEvent);
+      }));
+    }
   }
 
   @override
@@ -196,6 +207,44 @@ class _MapsPageState extends State<MapsPage> {
                   height: 1.4,
                 ),
               ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+               child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.indigo, Colors.indigoAccent],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: _onJoinUsPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Join Us',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              ),
             ],
           ),
         ),
@@ -223,6 +272,7 @@ class _MapsPageState extends State<MapsPage> {
                 selectedEventName = event.name;
                 selectedEventDescription = event.description;
                 selectedEventPosition = LatLng(event.latitude, event.longitude);
+                selectedEvent = event; // Store the full event object
               });
             },
             icon: icon,

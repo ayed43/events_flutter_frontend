@@ -34,32 +34,41 @@ class App extends StatelessWidget {
               return    Scaffold(
 
                 appBar: AppBar(
-
-                  title: Text('Saudi Fastivals App',style: TextStyle(color:Colors.indigo,fontSize: 24,fontWeight: FontWeight.bold),),
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  flexibleSpace: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.indigo, Colors.indigoAccent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                  ),
+                  title: const Text(
+                    'Saudi Festivals App',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                   actions: [
-                    // Theme toggle
-                    // IconButton(
-                    //   icon: home.isDark
-                    //       ? const Icon(Icons.sunny)
-                    //       : const Icon(Icons.dark_mode_outlined),
-                    //   onPressed: home.changeMode,
-                    // ),
-                    // Logout
-
-
                     IconButton(
-                      icon: const Icon(Icons.logout,color: Colors.indigo,),
+                      icon: const Icon(Icons.logout, color: Colors.white),
                       tooltip: 'Logout',
                       onPressed: () {
                         app.logout();
                         Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) =>  LoginPage()),
+                          MaterialPageRoute(builder: (_) => LoginPage()),
                               (route) => false,
                         );
                       },
                     ),
                   ],
                 ),
+
                 // floatingActionButton: FloatingActionButton(onPressed:
                 //     () {
                 //   HomeCubit.get(context).getData();

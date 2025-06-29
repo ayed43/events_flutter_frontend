@@ -108,25 +108,50 @@ class EventsPage extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Chip(
-                                label: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Icon(Icons.file_download_outlined,color: Colors.white,),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: Text(event.booked ? 'Booked' : 'book now'),
-                                    ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: event.booked
+                                      ? null
+                                      : const LinearGradient(
+                                    colors: [Colors.indigo, Colors.indigoAccent],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  color: event.booked ? Colors.green.shade100 : null,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(2, 2),
+                                    )
                                   ],
                                 ),
-                                backgroundColor: event.booked ? Colors.red.shade100 : Colors.indigo.shade400,
-                                labelStyle: TextStyle(
-                                  color: event.booked ? Colors.red : Colors.white,
-                                  fontWeight: FontWeight.bold,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        event.booked ? Icons.check_circle_rounded : Icons.circle,
+                                        color: event.booked ? Colors.green : Colors.white,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        event.booked ? 'Booked' : 'available',
+                                        style: TextStyle(
+                                          color: event.booked ? Colors.green.shade700 : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ),
+
                         ],
                       ),
                     ),

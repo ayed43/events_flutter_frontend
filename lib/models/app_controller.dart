@@ -5,7 +5,7 @@ import '../pages/chat_page.dart';
 import '../pages/map_page.dart';
 import '../pages/home.dart';
 import '../pages/bookings_page.dart';
-import '../pages/settings_page.dart';
+import '../pages/events_page.dart';
 
 
 class AppController extends ChangeNotifier{
