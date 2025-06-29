@@ -54,6 +54,7 @@ class BookingCubit extends Cubit<BookingStates>{
       data: {'event_id': eventId},
       bearerToken: token,
     ).then((response) {
+      emit(BookingSuccessState());
       print('Cancel Response: ${response.data}');
 
       if (response.data != null && response.data is Map<String, dynamic>) {
@@ -74,10 +75,7 @@ class BookingCubit extends Cubit<BookingStates>{
           print('✅ ${responseData['message']}');
 
           // SIMPLE FIX: Emit loading first, then success to force rebuild
-          emit(BookingLoadingState());
-          Future.delayed(Duration(milliseconds: 100), () {
-            emit(BookingSuccessState());
-          });
+
 
         } else {
           print('⚠️ Cancel failed: ${responseData['message']}');

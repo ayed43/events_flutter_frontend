@@ -1,7 +1,9 @@
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:demo/api_models/all_bookings_model.dart';
 import 'package:demo/cubits/booking_cubit/booking_cubit.dart';
 import 'package:demo/cubits/booking_cubit/booking_states.dart';
 import 'package:demo/constants.dart';
+import 'package:demo/pages/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -91,14 +93,7 @@ class _BookingsPageState extends State<BookingsPage> {
         },
         listener: (context, state) {
           if (state is BookingCancelSuccessState) {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('✅ ${state.message}'),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
+
           } else if (state is BookingErrorState) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
@@ -182,8 +177,30 @@ class BookingsList extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop();
+                // Navigator.of(dialogContext).pop();
                 BlocProvider.of<BookingCubit>(context).cancelBooking(eventId);
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                  return App();
+                },));
+                final snackBar = SnackBar(
+                  elevation: 0,
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.fromLTRB(16, 50, 16, 0), // تحركه للأعلى (50 من الأعلى)
+                  content: AwesomeSnackbarContent(
+                    title: 'success!',
+                    message:  'Booking Canceled you can rejoin anytime you want !',
+                    contentType: ContentType.success,
+                  ),
+                  duration: const Duration(seconds: 3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                );
+
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(snackBar);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
