@@ -1,11 +1,11 @@
-
-
 import 'package:bloc/bloc.dart';
 import 'package:demo/pages/app.dart';
 import 'package:demo/services/remote/dio_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:onboarding_screen/onboarding_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import 'auth/login/login_page.dart';
 import 'models/cache_controller/cache_controller.dart';
 import 'models/app_controller.dart';
@@ -13,12 +13,16 @@ import 'models/login_controller/login_controller.dart';
 import 'models/signup_controller/signup_controller.dart';
 
 void main() async {
-  DioHelper.init();
-  Bloc.observer = MyBlocObserver();
   WidgetsFlutterBinding.ensureInitialized();
 
+  DioHelper.init();
+  Bloc.observer = MyBlocObserver();
+
   await Hive.initFlutter();
-  await Hive.openBox('authBox');
+  final authBox = await Hive.openBox('authBox');
+
+  // Check if onboarding was shown before
+  final onboardingShown = authBox.get('onboardingShown', defaultValue: false);
 
   runApp(
     MultiProvider(
@@ -28,31 +32,36 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SignupController()),
         ChangeNotifierProvider(create: (_) => AppController()),
       ],
-      child: const MyApp(),
+      child: MyApp(showOnboarding: !onboardingShown),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool showOnboarding;
+
+  const MyApp({super.key, required this.showOnboarding});
 
   @override
   Widget build(BuildContext context) {
     final appController = Provider.of<CacheController>(context);
 
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.indigo,
-        fontFamily: 'Ubuntu'
-
-
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+        fontFamily: 'Ubuntu',
       ),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: appController.isLoggedIn ? const App() :  LoginPage(),
+      home:
+      showOnboarding
+          ? const OnboardingWrapper()
+          : appController.isLoggedIn
+          ? const App()
+          : LoginPage(),
     );
   }
 }
-
 
 class MyBlocObserver extends BlocObserver {
   @override
@@ -90,4 +99,102 @@ class MyBlocObserver extends BlocObserver {
     super.onClose(bloc);
     print('onClose -- ${bloc.runtimeType}');
   }
+}
+
+class OnboardingWrapper extends StatefulWidget {
+  const OnboardingWrapper({super.key});
+
+  @override
+  State<OnboardingWrapper> createState() => _OnboardingWrapperState();
+}
+
+class _OnboardingWrapperState extends State<OnboardingWrapper> {
+  final List<_SliderModel> mySlides = [
+    _SliderModel(
+      imageAssetPath: Image.asset('assets/images/logo.png'
+      ,
+        width: 150,
+        height: 150,
+      ),
+      title: 'Welcome to Saudi Festivals',
+      desc: 'Discover and join amazing cultural events!',
+      minTitleFontSize: 20,
+      miniDescFontSize: 14,
+      titleStyle: const TextStyle(
+          fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+      descStyle: const TextStyle(fontSize: 14, color: Colors.black87),
+    ),
+    _SliderModel(
+      imageAssetPath: Image.asset('assets/images/logo.png'
+        ,
+        width: 150,
+        height: 150,
+      ),
+      title: 'Book Your Spot',
+      desc: 'Easily reserve a place at any festival.',
+      minTitleFontSize: 20,
+      miniDescFontSize: 14,
+    ),
+    _SliderModel(
+      imageAssetPath: Image.asset('assets/images/logo.png'
+        ,
+        width: 150,
+        height: 150,
+      ),
+      title: 'Stay Connected',
+      desc: 'Get real-time updates and notifications.',
+      minTitleFontSize: 20,
+      miniDescFontSize: 14,
+    ),
+  ];
+
+  final PageController _controller = PageController();
+
+  @override
+  Widget build(BuildContext context) {
+    return OnBoardingScreen(
+      label: const Text('Get Started'),
+      function: () async {
+        final authBox = Hive.box('authBox');
+        await authBox.put('onboardingShown', true);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => LoginPage()),
+        );
+      },
+      mySlides: mySlides,
+      controller: _controller,
+      slideIndex: 0,
+      statusBarColor: Colors.indigo.shade50, // softer status bar color to match bg
+      startGradientColor: Colors.white,       // same as login page start
+      endGradientColor: const Color(0xFFB4FFF7), // same as login page end
+      skipStyle: const TextStyle(color: Colors.indigo), // use indigo to stand out
+      pageIndicatorColorList: [
+        Colors.indigo,
+        Colors.indigo.shade200,
+        Colors.indigo.shade400,
+      ],
+    );
+  }
+
+
+}
+
+class _SliderModel {
+  const _SliderModel({
+    required this.imageAssetPath,
+    this.title = "title",
+    this.desc = "desc",
+    this.miniDescFontSize = 12.0,
+    this.minTitleFontSize = 15.0,
+    this.descStyle,
+    this.titleStyle,
+  });
+
+  final Image imageAssetPath;
+  final String title;
+  final TextStyle? titleStyle;
+  final double minTitleFontSize;
+  final String desc;
+  final TextStyle? descStyle;
+  final double miniDescFontSize;
 }
