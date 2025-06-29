@@ -37,6 +37,7 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.2
   awesome_snackbar_content: ^0.1.4
+  iconsax: ^0.0.8
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -46,6 +47,7 @@ dependencies:
   conditional_builder_null_safety: ^0.0.6
   intl: ^0.20.2
   onboarding_screen: ^0.0.3
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:

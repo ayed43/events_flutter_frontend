@@ -11,8 +11,8 @@ class CategoryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
      // Fixed height for horizontal scroll
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
+
         children: [
           Padding(
             padding: const EdgeInsets.only(left:8.0),
