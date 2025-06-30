@@ -1,6 +1,7 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:demo/cubits/chat_cubit/chat_cubit.dart';
 import 'package:demo/cubits/chat_cubit/chat_states.dart';
+import 'package:demo/pages/provider/send_message_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +24,9 @@ class ChatPage extends StatelessWidget {
               itemCount: cubit.providers.length,
               itemBuilder: (context, index) {
                 return ListTile(onTap: () {
-
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SendMessagePage(
+                  provider: cubit.providers[index],
+                ),));
                 },
 
                 title: Text(cubit.providers[index].name!),

@@ -65,7 +65,7 @@ class App extends StatelessWidget {
                     ),
                     actions: [
                       IconButton(
-                        icon: const Icon(Icons.settings_power, color: Colors.white,size: 30,),
+                        icon: const Icon(Icons.settings_power, color: Colors.white,size: 35,),
                         tooltip: 'Logout',
                         onPressed: () {
                           // app.logout();

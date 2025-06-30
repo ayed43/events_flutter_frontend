@@ -335,7 +335,6 @@ class DetailsPage extends StatelessWidget {
              borderRadius: BorderRadius.circular(12),
            ),
          );
-
          ScaffoldMessenger.of(context)
            ..hideCurrentSnackBar()
            ..showSnackBar(snackBar);

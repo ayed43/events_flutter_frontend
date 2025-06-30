@@ -26,13 +26,50 @@ class ChatCubit extends Cubit<ChatStates>{
       emit(ChatSuccessProvidersState());
 
     }).catchError((error){
-
       emit(ChatErrorProvidersState());
+    });
+  }
+
+
+  sendMessage(int providerId, String title,String body)async {
+
+    emit(ChatSendMessageLoading());
+    await Future.delayed(Duration(seconds: 2));
+    DioHelper.postData(url: '${serverUrl}/api/messages',
+        bearerToken: CacheController().token,
+        data: {'provider_id':providerId,'title':title,'body':body},).then((value){
+
+          print(value.data);
+          emit(ChatSendMessageSuccess());
+
+
+        })
+    .catchError((error){
+
+      emit(ChatSendMessagError());
 
     });
 
-
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
