@@ -1,3 +1,4 @@
+import 'package:demo/cubits/chat_cubit/chat_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
 import 'package:demo/models/cache_controller/cache_controller.dart';
@@ -22,8 +23,15 @@ class App extends StatelessWidget {
         final userName = app.user?['name'] ?? 'Guest';
 
         return
-          BlocProvider
-            (create: (BuildContext context)=>HomeCubit()..getData(),
+          MultiBlocProvider
+            (
+            providers: [
+              BlocProvider<HomeCubit>(
+                create: (BuildContext context) => HomeCubit()..getData(),
+              ),
+              BlocProvider<ChatCubit>(create: (context) => ChatCubit()..getProviders(),)
+            ],
+
             child: BlocConsumer<HomeCubit,HomeStates>(
               listener: (context, state) {
                 var cubit=HomeCubit.get(context);
@@ -57,14 +65,14 @@ class App extends StatelessWidget {
                     ),
                     actions: [
                       IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.white),
+                        icon: const Icon(Icons.settings_power, color: Colors.white,size: 30,),
                         tooltip: 'Logout',
                         onPressed: () {
-                          app.logout();
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => LoginPage()),
-                                (route) => false,
-                          );
+                          // app.logout();
+                          // Navigator.of(context).pushAndRemoveUntil(
+                          //   MaterialPageRoute(builder: (_) => LoginPage()),
+                          //       (route) => false,
+                          // );
                         },
                       ),
                     ],
@@ -148,6 +156,7 @@ class App extends StatelessWidget {
     required int currentIndex,
     required VoidCallback onTap,
     bool isCenter = false,
+
   }) {
     final isSelected = currentIndex == index;
 

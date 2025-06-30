@@ -30,7 +30,7 @@ class HomeCubit extends Cubit<HomeStates> {
       categories = categoriesData.map((e) => CategoryModel.fromJson(e)).toList();
       List eventData=value.data['events'];
       events = eventData.map((e) => EventModel.fromJson(e)).toList();
-      print(events[0].availableSeats);
+      // print(events[0].availableSeats);
 
 
     }).catchError((error){
