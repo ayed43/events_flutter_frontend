@@ -1,10 +1,10 @@
 
+import 'package:demo/pages/bookings_page.dart';
 import 'package:flutter/material.dart';
 
 import '../pages/chat_page.dart';
 import '../pages/map_page.dart';
 import '../pages/home.dart';
-import '../pages/bookings_page.dart';
 import '../pages/events_page.dart';
 
 
@@ -24,7 +24,7 @@ class AppController extends ChangeNotifier{
     BookingsPage(),
     ChatPage()
   ];
-  int currentIndex=4;
+  int currentIndex=0;
 
   buttomNavBar(a){
     this.currentIndex=a;

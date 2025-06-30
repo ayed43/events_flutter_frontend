@@ -3,6 +3,7 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:demo/api_models/providers/provider_model.dart';
 import 'package:demo/cubits/chat_cubit/chat_cubit.dart';
 import 'package:demo/cubits/chat_cubit/chat_states.dart';
+import 'package:demo/pages/provider/archive_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,7 +16,7 @@ class SendMessagePage extends StatelessWidget {
     final titleController = TextEditingController();
     final bodyController = TextEditingController();
 
-    return BlocProvider(create: (context) => ChatCubit(),
+    return BlocProvider(create: (context) => ChatCubit()..getProviders(),
       child: BlocConsumer<ChatCubit, ChatStates>(
         listener: (context, state) {
           // يمكن تضيف Snackbar هنا إذا أُرسلت الرسالة
@@ -160,7 +161,11 @@ class SendMessagePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12), // مسافة بين الخط والنص
-                        const Text('Show Archive'),
+                        InkWell(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ArchivePage(provider_id: provider.id!),));
+                            },
+                            child: const Text('Show Archive')),
                         const SizedBox(width: 12), // مسافة بين النص والخط
                         const Expanded(
                           child: Divider(
