@@ -1,4 +1,5 @@
 
+import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/pages/bookings_page.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,10 @@ class AppController extends ChangeNotifier{
   ];
   int currentIndex=0;
 
-  buttomNavBar(a){
+  buttomNavBar(a,context){
+    if (a==0){
+      HomeCubit.get(context).getData();
+    }
     this.currentIndex=a;
     notifyListeners();
   }
