@@ -30,6 +30,68 @@ class CacheController with ChangeNotifier {
 
   bool get isLoggedIn => token != null;
 
+  // Location getters and setters
+  double? get myLat {
+    final lat = _authBox.get('myLat');
+    return lat is double ? lat : null;
+  }
+
+  double? get myLang {
+    final lang = _authBox.get('myLang');
+    return lang is double ? lang : null;
+  }
+
+  // Save location data
+  void saveLocation(double latitude, double longitude) {
+    _authBox.put('myLat', latitude);
+    _authBox.put('myLang', longitude);
+    _authBox.put('lastLocationUpdate', DateTime.now().toIso8601String());
+    notifyListeners();
+  }
+
+  // Get last location update timestamp
+  DateTime? get lastLocationUpdate {
+    final timestamp = _authBox.get('lastLocationUpdate');
+    if (timestamp is String) {
+      try {
+        return DateTime.parse(timestamp);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Check if location data exists
+  bool get hasLocationData => myLat != null && myLang != null;
+
+  // Get location as a map
+  Map<String, double>? get locationData {
+    if (hasLocationData) {
+      return {
+        'latitude': myLat!,
+        'longitude': myLang!,
+      };
+    }
+    return null;
+  }
+
+  // Clear only location data
+  void clearLocationData() {
+    _authBox.delete('myLat');
+    _authBox.delete('myLang');
+    _authBox.delete('lastLocationUpdate');
+    notifyListeners();
+  }
+
+  // Get formatted location string
+  String get formattedLocation {
+    if (hasLocationData) {
+      return 'Lat: ${myLat!.toStringAsFixed(6)}, Lng: ${myLang!.toStringAsFixed(6)}';
+    }
+    return 'Location not available';
+  }
+
   Future<void> logout() async {
     final currentToken = token;
 
@@ -46,7 +108,7 @@ class CacheController with ChangeNotifier {
 
       if (response.statusCode == 200) {
         print('Logout successful: ${response.body}');
-        // Clear all user data from Hive
+        // Clear all user data from Hive (including location data)
         await _authBox.clear();
         notifyListeners();
       } else {
@@ -55,7 +117,5 @@ class CacheController with ChangeNotifier {
     } catch (e) {
       print('Logout error: $e');
     }
-
-
   }
 }
