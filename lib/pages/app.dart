@@ -68,11 +68,11 @@ class App extends StatelessWidget {
                         icon: const Icon(Icons.settings_power, color: Colors.white,size: 35,),
                         tooltip: 'Logout',
                         onPressed: () {
-                          // app.logout();
-                          // Navigator.of(context).pushAndRemoveUntil(
-                          //   MaterialPageRoute(builder: (_) => LoginPage()),
-                          //       (route) => false,
-                          // );
+                          app.logout();
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => LoginPage()),
+                                (route) => false,
+                          );
                         },
                       ),
                     ],

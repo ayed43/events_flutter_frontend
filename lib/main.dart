@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:onboarding_screen/onboarding_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
 import 'auth/login/login_page.dart';
 import 'models/cache_controller/cache_controller.dart';
 import 'models/app_controller.dart';

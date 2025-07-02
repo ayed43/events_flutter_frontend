@@ -223,6 +223,34 @@ class LoginPage extends StatelessWidget {
                                 style: TextStyle(    fontWeight: FontWeight.bold,color: Colors.indigo),
                               ),
                             ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                              InkWell(
+                                onTap: () {
+                                      print('hello from google ');
+                                },
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  child: Image(
+
+                                      image: AssetImage(
+
+                                          'assets/images/google.png')),
+                                ),
+                              ),
+                            ],),
+                            const Text(
+                              'Google Login',
+                              style: TextStyle(
+                                color: Colors.indigo,
+                                fontSize: 16,
+
+                              ),
+                            ),
+
+
                           ],
                         ),
                       ),

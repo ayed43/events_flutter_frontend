@@ -82,7 +82,7 @@ class _ArchivePageState extends State<ArchivePage> {
                     Container(
                       width: double.infinity,
                       color: Colors.white,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(8),
                       child: Center(
                         child: ToggleButtons(
                           borderRadius: BorderRadius.circular(8),
@@ -121,15 +121,15 @@ class _ArchivePageState extends State<ArchivePage> {
                           },
                           children: const [
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              padding: EdgeInsets.symmetric(horizontal: 8),
                               child: Text('All', style: TextStyle(fontWeight: FontWeight.w600)),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              padding: EdgeInsets.symmetric(horizontal: 8),
                               child: Text('Pending', style: TextStyle(fontWeight: FontWeight.w600)),
                             ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              padding: EdgeInsets.symmetric(horizontal: 8),
                               child: Text('Success', style: TextStyle(fontWeight: FontWeight.w600)),
                             ),
                             Padding(
