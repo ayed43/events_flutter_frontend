@@ -9,8 +9,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  double _selectedRadius = 50.0; // Default radius
+
+  final List<double> _radiusOptions = [1.0, 5.0, 10.0, 50.0];
+
+  void _updateRadius(double newRadius) {
+    setState(() {
+      _selectedRadius = newRadius;
+    });
+    // Refresh nearby events with new radius
+    HomeCubit.get(context).refreshNearbyEvents(radiusKm: newRadius);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +95,7 @@ class HomePage extends StatelessWidget {
                           ),
                           if (cacheController.hasLocationData)
                             Text(
-                              'Within 50km of your location',
+                              'Within ${_selectedRadius == _selectedRadius.toInt() ? _selectedRadius.toInt() : _selectedRadius}km of your location',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.indigo.shade600,
@@ -90,6 +107,52 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+
+                // Distance Filter Chips
+                if (cacheController.hasLocationData) ...[
+                  Text(
+                    'Distance Filter',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.indigo.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _radiusOptions.map((radius) {
+                      final isSelected = _selectedRadius == radius;
+                      return FilterChip(
+                        label: Text(
+                          '${radius == radius.toInt() ? radius.toInt() : radius}km',
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.indigo.shade700,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            _updateRadius(radius);
+                          }
+                        },
+                        selectedColor: Colors.indigo,
+                        backgroundColor: Colors.indigo.shade50,
+                        checkmarkColor: Colors.white,
+                        side: BorderSide(
+                          color: isSelected ? Colors.indigo : Colors.indigo.shade200,
+                          width: 1.5,
+                        ),
+                        elevation: isSelected ? 4 : 1,
+                        shadowColor: Colors.indigo.withOpacity(0.3),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
                 // Location status
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -119,7 +182,7 @@ class HomePage extends StatelessWidget {
                       Expanded(
                         child: Text(
                           cacheController.hasLocationData
-                              ? 'Location detected • ${nearbyEvents.length} events found'
+                              ? 'Location detected • ${nearbyEvents.length} events found within ${_selectedRadius == _selectedRadius.toInt() ? _selectedRadius.toInt() : _selectedRadius}km'
                               : 'Location not available • Please enable location access',
                           style: TextStyle(
                             color: cacheController.hasLocationData
@@ -193,7 +256,7 @@ class HomePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'No events found within 50km\nof your location',
+                    'No events found within ${_selectedRadius == _selectedRadius.toInt() ? _selectedRadius.toInt() : _selectedRadius}km\nof your location',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
@@ -201,17 +264,28 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      cubit.refreshNearbyEvents(radiusKm: 100.0);
-                    },
-                    icon: const Icon(Icons.search),
-                    label: const Text('Search within 100km'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
-                      foregroundColor: Colors.white,
+                  // Suggestion to try larger radius
+                  if (_selectedRadius < 50.0)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _updateRadius(50.0);
+                      },
+                      icon: const Icon(Icons.search),
+                      label: const Text('Try 50km radius'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
+                        foregroundColor: Colors.white,
+                      ),
+                    )
+                  else
+                    Text(
+                      'Try selecting a different distance filter',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -277,7 +351,14 @@ class HomePage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.indigo,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.indigo,
+                            Colors.indigo.shade600,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -297,7 +378,9 @@ class HomePage extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${distance.toStringAsFixed(1)}km',
+                            distance < 1
+                                ? '${(distance * 1000).toInt()}m'
+                                : '${distance.toStringAsFixed(1)}km',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

@@ -21,6 +21,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   bool _locationRequested = false;
+  bool _initialLocationDetected = false; // Add this flag
 
   @override
   void initState() {
@@ -36,6 +37,12 @@ class _AppState extends State<App> {
     _locationRequested = true;
 
     final cacheController = Provider.of<CacheController>(context, listen: false);
+
+    // Check if location was already saved (app restart scenario)
+    if (cacheController.hasLocationData) {
+      _initialLocationDetected = true;
+      return;
+    }
 
     try {
       // Check if location services are enabled
@@ -70,13 +77,24 @@ class _AppState extends State<App> {
 
       print('Location saved: Lat: ${position.latitude}, Lng: ${position.longitude}');
 
-      // Show success message
-      if (mounted) {
+      // Show success message ONLY for initial detection
+      if (mounted && !_initialLocationDetected) {
+        _initialLocationDetected = true;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Location saved successfully!'),
+            content: Row(
+              children: [
+                Icon(Icons.location_on, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Location detected successfully!'),
+              ],
+            ),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }
@@ -105,7 +123,7 @@ class _AppState extends State<App> {
     }
   }
 
-  // Manual location refresh function
+  // Manual location refresh function - NO snackbar for manual refresh
   Future<void> _refreshLocation() async {
     final cacheController = Provider.of<CacheController>(context, listen: false);
 
@@ -116,19 +134,47 @@ class _AppState extends State<App> {
 
       cacheController.saveLocation(position.latitude, position.longitude);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Location refreshed successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Only show snackbar for manual refresh, different message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.refresh, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Location updated!'),
+              ],
+            ),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to refresh location: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Expanded(child: Text('Failed to refresh location: $e')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -180,36 +226,8 @@ class _AppState extends State<App> {
                         ),
                       ),
                       const Spacer(),
-                      // Location status indicator
-                      if (cacheController.hasLocationData)
-                        // Container(
-                        //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.green.withOpacity(0.2),
-                        //     borderRadius: BorderRadius.circular(12),
-                        //     border: Border.all(color: Colors.green, width: 1),
-                        //   ),
-                        //   child: Row(
-                        //     mainAxisSize: MainAxisSize.min,
-                        //     children: [
-                        //       Icon(
-                        //         Icons.location_on,
-                        //         color: Colors.green,
-                        //         size: 16,
-                        //       ),
-                        //       const SizedBox(width: 4),
-                        //       Text(
-                        //         'SAVED',
-                        //         style: TextStyle(
-                        //           color: Colors.green,
-                        //           fontSize: 12,
-                        //           fontWeight: FontWeight.bold,
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-                        Container()
+                      // Location status indicator removed as requested
+                      Container()
                     ],
                   ),
                   actions: [
@@ -217,9 +235,9 @@ class _AppState extends State<App> {
                     PopupMenuButton<String>(
                       icon: Icon(
                         cacheController.hasLocationData
-                            ? Icons.location_on
+                            ? Icons.location_on_outlined
                             : Icons.location_off,
-                        color: cacheController.hasLocationData ? Colors.green : Colors.grey,
+                        color: cacheController.hasLocationData ? Colors.white : Colors.grey,
                         size: 28,
                       ),
                       onSelected: (value) {
@@ -230,7 +248,21 @@ class _AppState extends State<App> {
                           case 'clear':
                             cacheController.clearLocationData();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Location data cleared')),
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(Icons.clear, color: Colors.white, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Location data cleared'),
+                                  ],
+                                ),
+                                backgroundColor: Colors.orange,
+                                duration: Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
                             );
                             break;
                         }
@@ -343,8 +375,6 @@ class _AppState extends State<App> {
     );
   }
 
-
-
   Widget _buildNavItem({
     required IconData icon,
     required String label,
@@ -419,26 +449,26 @@ class _AppState extends State<App> {
   }
 }
 
-class MyText extends StatelessWidget {
-  final String text;
-  const MyText(this.text, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListTile(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(text),
-            const Icon(Icons.running_with_errors_rounded),
-          ],
-        ),
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const SecondPage()));
-        },
-      ),
-    );
-  }
-}
+// class MyText extends StatelessWidget {
+//   final String text;
+//   const MyText(this.text, {super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: ListTile(
+//       title: Row(
+//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//       children: [
+//         Text(text),
+//         const Icon(Icons.running_with_errors_rounded),
+//       ],
+//     ),
+//     onTap: () {
+//     Navigator.push(context, MaterialPageRoute(builder: (_) => const SecondPage()));
+//     ),
+//     ),
+//     );
+//     }
+//   }
