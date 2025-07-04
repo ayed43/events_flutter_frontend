@@ -17,17 +17,39 @@ class App extends StatefulWidget {
   State<App> createState() => _AppState();
 }
 
-class _AppState extends State<App> {
+class _AppState extends State<App> with TickerProviderStateMixin {
   bool _locationRequested = false;
-  bool _initialLocationDetected = false; // Add this flag
+  bool _initialLocationDetected = false;
+  late AnimationController _navAnimationController;
+  late AnimationController _appBarAnimationController;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize animation controllers
+    _navAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _appBarAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+
     // Request location once when app starts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _requestLocationOnce();
+      _navAnimationController.forward();
+      _appBarAnimationController.forward();
     });
+  }
+
+  @override
+  void dispose() {
+    _navAnimationController.dispose();
+    _appBarAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _requestLocationOnce() async {
@@ -78,22 +100,10 @@ class _AppState extends State<App> {
       // Show success message ONLY for initial detection
       if (mounted && !_initialLocationDetected) {
         _initialLocationDetected = true;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.location_on, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text('Location detected successfully!'),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+        _showModernSnackBar(
+          'Location detected successfully!',
+          Icons.location_on,
+          Colors.green,
         );
       }
 
@@ -108,12 +118,32 @@ class _AppState extends State<App> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Location'),
-          content: Text(message),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.indigo.shade400, Colors.indigoAccent.shade400],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.location_on, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              const Text('Location', style: TextStyle(fontWeight: FontWeight.w600)),
+            ],
+          ),
+          content: Text(message, style: TextStyle(color: Colors.grey.shade700)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.indigo.withOpacity(0.1),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text('OK', style: TextStyle(color: Colors.indigo.shade600, fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -121,7 +151,7 @@ class _AppState extends State<App> {
     }
   }
 
-  // Manual location refresh function - NO snackbar for manual refresh
+  // Manual location refresh function
   Future<void> _refreshLocation() async {
     final cacheController = Provider.of<CacheController>(context, listen: false);
 
@@ -132,48 +162,62 @@ class _AppState extends State<App> {
 
       cacheController.saveLocation(position.latitude, position.longitude);
 
-      // Only show snackbar for manual refresh, different message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.refresh, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text('Location updated!'),
-              ],
-            ),
-            backgroundColor: Colors.blue,
-            duration: Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+        _showModernSnackBar(
+          'Location updated!',
+          Icons.refresh,
+          Colors.blue,
         );
       }
 
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.error, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Expanded(child: Text('Failed to refresh location: $e')),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+        _showModernSnackBar(
+          'Failed to refresh location',
+          Icons.error,
+          Colors.red,
         );
       }
     }
+  }
+
+  void _showModernSnackBar(String message, IconData icon, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        backgroundColor: Colors.indigo.shade600,
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -200,170 +244,269 @@ class _AppState extends State<App> {
             },
             builder: (context, state) {
               return Scaffold(
-                appBar: AppBar(
-                  elevation: 0,
-                  backgroundColor: Colors.transparent,
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.indigo, Colors.indigoAccent],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                  ),
-                  title: Row(
-                    children: [
-                      const Text(
-                        'Saudi Festivals App',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Location status indicator removed as requested
-                      Container()
-                    ],
-                  ),
-                  actions: [
-                    // Location control button
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        cacheController.hasLocationData
-                            ? Icons.location_on_outlined
-                            : Icons.location_off,
-                        color: cacheController.hasLocationData ? Colors.white : Colors.grey,
-                        size: 28,
-                      ),
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'refresh':
-                            _refreshLocation();
-                            break;
-                          case 'clear':
-                            cacheController.clearLocationData();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Row(
+                backgroundColor: const Color(0xFFFAFAFE),
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    print(CacheController().getUserFav());
+                    print(CacheController().getIsFavOpen());
+                  },
+                  backgroundColor: Colors.indigo.shade600,
+                  elevation: 8,
+                  child: const Icon(Icons.bug_report, color: Colors.white),
+                ),
+
+                // Enhanced AppBar
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(80),
+                  child: AnimatedBuilder(
+                    animation: _appBarAnimationController,
+                    builder: (context, child) {
+                      return Transform.translate(
+                        offset: Offset(0, -20 * (1 - _appBarAnimationController.value)),
+                        child: Opacity(
+                          opacity: _appBarAnimationController.value,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.indigo.shade600,
+                                  Colors.indigo.shade500,
+                                  Colors.indigoAccent.shade400,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(24),
+                                bottomRight: Radius.circular(24),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: SafeArea(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                child: Row(
                                   children: [
-                                    Icon(Icons.clear, color: Colors.white, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('Location data cleared'),
+                                    // App Title with Icon - Very Compact
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.celebration,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    const Expanded(
+                                      child: Text(
+                                        'Saudi Festivals',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+
+                                    // Location Menu - Ultra Compact
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      margin: const EdgeInsets.only(right: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: PopupMenuButton<String>(
+                                        padding: EdgeInsets.zero,
+                                        iconSize: 16,
+                                        icon: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Icon(
+                                              cacheController.hasLocationData
+                                                  ? Icons.location_on
+                                                  : Icons.location_off,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
+                                            if (cacheController.hasLocationData)
+                                              Positioned(
+                                                right: 4,
+                                                top: 4,
+                                                child: Container(
+                                                  width: 4,
+                                                  height: 4,
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.greenAccent,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                        onSelected: (value) {
+                                          switch (value) {
+                                            case 'refresh':
+                                              _refreshLocation();
+                                              break;
+                                            case 'clear':
+                                              cacheController.clearLocationData();
+                                              _showModernSnackBar(
+                                                'Location cleared',
+                                                Icons.clear,
+                                                Colors.orange,
+                                              );
+                                              break;
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            value: 'refresh',
+                                            height: 40,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.refresh, color: Colors.blue.shade600, size: 16),
+                                                const SizedBox(width: 6),
+                                                const Text('Refresh', style: TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'clear',
+                                            height: 40,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(Icons.clear, color: Colors.red.shade600, size: 16),
+                                                const SizedBox(width: 6),
+                                                const Text('Clear', style: TextStyle(fontSize: 12)),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+
+                                    // Logout Button - Ultra Compact
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        iconSize: 16,
+                                        icon: const Icon(
+                                          Icons.power_settings_new_rounded,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          _showLogoutDialog(cacheController);
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                backgroundColor: Colors.orange,
-                                duration: Duration(seconds: 2),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
                               ),
-                            );
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'refresh',
-                          child: Row(
-                            children: [
-                              Icon(Icons.refresh, color: Colors.blue),
-                              SizedBox(width: 8),
-                              Text('Refresh Location'),
-                            ],
+                            ),
                           ),
                         ),
-                        PopupMenuItem(
-                          value: 'clear',
-                          child: Row(
-                            children: [
-                              Icon(Icons.clear, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Clear Location'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.settings_power,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-                      tooltip: 'Logout',
-                      onPressed: () {
-                        cacheController.logout();
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => LoginPage()),
-                              (route) => false,
-                        );
-                      },
-                    ),
-                  ],
+                      );
+                    },
+                  ),
                 ),
+
                 body: home.pages[home.currentIndex],
-                bottomNavigationBar: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, -2),
+
+                // Enhanced Bottom Navigation Bar
+                bottomNavigationBar: AnimatedBuilder(
+                  animation: _navAnimationController,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 100 * (1 - _navAnimationController.value)),
+                      child: Container(
+                        margin: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.indigo.withOpacity(0.15),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildCompactNavItem(
+                                  icon: Icons.home_rounded,
+                                  label: 'Home',
+                                  index: 0,
+                                  currentIndex: home.currentIndex,
+                                  onTap: () => home.buttomNavBar(0, context),
+                                ),
+                                _buildCompactNavItem(
+                                  icon: Icons.celebration_rounded,
+                                  label: 'Events',
+                                  index: 1,
+                                  currentIndex: home.currentIndex,
+                                  onTap: () => home.buttomNavBar(1, context),
+                                ),
+                                _buildCompactNavItem(
+                                  icon: Icons.location_on_outlined,
+                                  label: 'Map',
+                                  index: 2,
+                                  currentIndex: home.currentIndex,
+                                  onTap: () => home.buttomNavBar(2, context),
+
+                                  hasLocationIndicator: cacheController.hasLocationData,
+                                ),
+                                _buildCompactNavItem(
+                                  icon: Icons.bookmark_rounded,
+                                  label: 'Bookings',
+                                  index: 3,
+                                  currentIndex: home.currentIndex,
+                                  onTap: () => home.buttomNavBar(3, context),
+                                ),
+                                _buildCompactNavItem(
+                                  icon: Icons.chat_bubble_rounded,
+                                  label: 'Chats',
+                                  index: 4,
+                                  currentIndex: home.currentIndex,
+                                  onTap: () => home.buttomNavBar(4, context),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildNavItem(
-                            icon: Icons.home_filled,
-                            label: 'Home',
-                            index: 0,
-                            currentIndex: home.currentIndex,
-                            onTap: () => home.buttomNavBar(0,context),
-                          ),
-                          _buildNavItem(
-                            icon: Icons.party_mode,
-                            label: 'Events',
-                            index: 1,
-                            currentIndex: home.currentIndex,
-                            onTap: () => home.buttomNavBar(1,context),
-                          ),
-                          _buildNavItem(
-                            icon: Icons.location_on_outlined,
-                            label: 'Map',
-                            index: 2,
-                            currentIndex: home.currentIndex,
-                            onTap: () => home.buttomNavBar(2,context),
-                            isCenter: true,
-                            hasLocationIndicator: cacheController.hasLocationData,
-                          ),
-                          _buildNavItem(
-                            icon: Icons.my_location_rounded,
-                            label: 'Bookings',
-                            index: 3,
-                            currentIndex: home.currentIndex,
-                            onTap: () => home.buttomNavBar(3,context),
-                          ),
-                          _buildNavItem(
-                            icon: Icons.chat,
-                            label: 'Chats',
-                            index: 4,
-                            currentIndex: home.currentIndex,
-                            onTap: () => home.buttomNavBar(4,context),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               );
             },
@@ -373,13 +516,62 @@ class _AppState extends State<App> {
     );
   }
 
-  Widget _buildNavItem({
+  void _showLogoutDialog(CacheController cacheController) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.red.shade400, Colors.red.shade600],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              cacheController.logout();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => LoginPage()),
+                    (route) => false,
+              );
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red.withOpacity(0.1),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text('Logout', style: TextStyle(color: Colors.red.shade600, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactNavItem({
     required IconData icon,
     required String label,
     required int index,
     required int currentIndex,
     required VoidCallback onTap,
-    bool isCenter = false,
     bool hasLocationIndicator = false,
   }) {
     final isSelected = currentIndex == index;
@@ -387,56 +579,52 @@ class _AppState extends State<App> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               children: [
                 Container(
-                  padding: EdgeInsets.all(isCenter ? 12.0 : 8.0),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: isCenter
-                        ? Colors.black
-                        : (isSelected ? Colors.indigo.withOpacity(0.1) : Colors.transparent),
+                    color: isSelected
+                        ? Colors.indigo.withOpacity(0.1)
+                        : Colors.transparent,
                     shape: BoxShape.circle,
-                    border: isCenter
-                        ? null
-                        : (isSelected
-                        ? Border.all(color: Colors.indigo.withOpacity(0.3), width: 1)
-                        : null),
                   ),
                   child: Icon(
                     icon,
-                    color: isCenter
-                        ? Colors.white
-                        : (isSelected ? Colors.indigo : Colors.grey[600]),
-                    size: isCenter ? 28.0 : 24.0,
+                    color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
+                    size: 22,
                   ),
                 ),
+
                 // Location indicator for Map tab
                 if (hasLocationIndicator && index == 2)
                   Positioned(
-                    right: 0,
-                    top: 0,
+                    right: 4,
+                    top: 4,
                     child: Container(
-                      width: 12,
-                      height: 12,
+                      width: 8,
+                      height: 8,
                       decoration: BoxDecoration(
                         color: Colors.green,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: Colors.white, width: 1),
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+
+            const SizedBox(height: 2),
+
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.indigo : Colors.grey[600],
-                fontSize: 12,
+                color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -446,27 +634,3 @@ class _AppState extends State<App> {
     );
   }
 }
-
-// class MyText extends StatelessWidget {
-//   final String text;
-//   const MyText(this.text, {super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: ListTile(
-//       title: Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//       children: [
-//         Text(text),
-//         const Icon(Icons.running_with_errors_rounded),
-//       ],
-//     ),
-//     onTap: () {
-//     Navigator.push(context, MaterialPageRoute(builder: (_) => const SecondPage()));
-//     ),
-//     ),
-//     );
-//     }
-//   }
