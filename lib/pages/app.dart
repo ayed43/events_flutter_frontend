@@ -323,7 +323,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
                                     Container(
                                       width: 32,
                                       height: 32,
-                                      margin: const EdgeInsets.only(right: 2),
+                                      margin: const EdgeInsets.only(right: 20),
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(8),
