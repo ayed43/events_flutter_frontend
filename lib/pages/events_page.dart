@@ -19,6 +19,7 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
   bool _checkedFavorites = false;
   bool _showOnlyFavorites = false;
+  String? _selectedCategoryId; // null means "All Categories"
   late AnimationController _filterAnimationController;
   late Animation<double> _filterAnimation;
 
@@ -84,23 +85,45 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     }
   }
 
-  List<dynamic> _getFilteredEvents(List<dynamic> events, List<dynamic> userFavCategories) {
-    if (_showOnlyFavorites) {
-      return events.where((event) =>
-          userFavCategories.contains(event.categoryName)).toList();
+  List<dynamic> _getFilteredEvents(List<dynamic> events, List<dynamic> userFavCategories, List<dynamic> categories) {
+    List<dynamic> filteredEvents = events;
+
+    // First filter by category if selected
+    if (_selectedCategoryId != null) {
+      filteredEvents = events.where((event) =>
+      event.categoryId.toString() == _selectedCategoryId).toList();
     }
 
-    // Sort events: favorites first, then others
-    final favoriteEvents = events.where((event) =>
-        userFavCategories.contains(event.categoryName)).toList();
-    final otherEvents = events.where((event) =>
-    !userFavCategories.contains(event.categoryName)).toList();
+    // Then apply favorites filter
+    if (_showOnlyFavorites) {
+      return filteredEvents.where((event) =>
+          userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
+    }
 
-    return [...favoriteEvents, ...otherEvents];
+    // Sort events: favorites first, then others (only if no category filter)
+    if (_selectedCategoryId == null) {
+      final favoriteEvents = filteredEvents.where((event) =>
+          userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
+      final otherEvents = filteredEvents.where((event) =>
+      !userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
+
+      return [...favoriteEvents, ...otherEvents];
+    }
+
+    return filteredEvents;
   }
 
-  bool _isEventFavorite(dynamic event, List<dynamic> userFavCategories) {
-    return userFavCategories.contains(event.categoryName);
+  bool _isEventFavorite(dynamic event, List<dynamic> userFavCategories, List<dynamic> categories) {
+    return userFavCategories.contains(_getCategoryNameById(event.categoryId, categories));
+  }
+
+  String _getCategoryNameById(int categoryId, List<dynamic> categories) {
+    try {
+      final category = categories.firstWhere((cat) => cat.id == categoryId);
+      return category.name ?? '';
+    } catch (e) {
+      return '';
+    }
   }
 
   @override
@@ -108,10 +131,11 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     return BlocConsumer<HomeCubit, HomeStates>(
       builder: (context, state) {
         final events = HomeCubit.get(context).events;
+        final categories = HomeCubit.get(context).categories ?? [];
         final userFavCategories = CacheController().getUserFav();
-        final filteredEvents = _getFilteredEvents(events, userFavCategories);
+        final filteredEvents = _getFilteredEvents(events, userFavCategories, categories);
         final favoriteCount = events.where((event) =>
-            userFavCategories.contains(event.categoryName)).length;
+            userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).length;
 
         if (events.isEmpty) {
           return RefreshIndicator(
@@ -164,7 +188,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _showOnlyFavorites ? 'Your Favorite Events' : 'All Events',
+                              _getFilterStatusText(filteredEvents.length, favoriteCount),
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -172,9 +196,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                               ),
                             ),
                             Text(
-                              _showOnlyFavorites
-                                  ? '$favoriteCount events match your interests'
-                                  : '${filteredEvents.length} total events • $favoriteCount favorites',
+                              _getFilterSubtitleText(events.length, filteredEvents.length, favoriteCount),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.indigo.shade600,
@@ -237,6 +259,144 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                     ],
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // Category Filter Dropdown
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.indigo.withOpacity(0.2)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.category_outlined, color: Colors.indigo.shade600, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Category:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.indigo.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedCategoryId,
+                              isExpanded: true,
+                              hint: Text(
+                                'All Categories',
+                                style: TextStyle(
+                                  color: Colors.indigo.shade400,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              style: TextStyle(
+                                color: Colors.indigo.shade800,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              icon: Icon(Icons.expand_more, color: Colors.indigo.shade400),
+                              items: [
+                                DropdownMenuItem<String>(
+                                  value: null,
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.all_inclusive, color: Colors.indigo.shade400, size: 18),
+                                      const SizedBox(width: 8),
+                                      const Text('All Categories'),
+                                    ],
+                                  ),
+                                ),
+                                ...categories.map<DropdownMenuItem<String>>((category) {
+                                  final isUserFavorite = userFavCategories.contains(category.name);
+                                  return DropdownMenuItem<String>(
+                                    value: category.id.toString(),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: isUserFavorite
+                                                ? Colors.indigo.withOpacity(0.1)
+                                                : Colors.grey.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Icon(
+                                            isUserFavorite ? Icons.favorite : Icons.category,
+                                            color: isUserFavorite
+                                                ? Colors.indigo.shade600
+                                                : Colors.grey.shade600,
+                                            size: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            category.name ?? 'Unknown',
+                                            style: TextStyle(
+                                              fontWeight: isUserFavorite ? FontWeight.w600 : FontWeight.normal,
+                                            ),
+                                          ),
+                                        ),
+                                        if (isUserFavorite)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.indigo.shade100,
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              'Fav',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.indigo.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  _selectedCategoryId = newValue;
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
+                        // Clear category filter button
+                        if (_selectedCategoryId != null)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedCategoryId = null;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.red.shade600,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
                   // Filter indicator
                   if (_showOnlyFavorites && favoriteCount == 0) ...[
                     const SizedBox(height: 12),
@@ -256,6 +416,34 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                               'No events match your interests. Try updating your preferences!',
                               style: TextStyle(
                                 color: Colors.orange.shade700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  if (_selectedCategoryId != null && filteredEvents.isEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.filter_list_off, color: Colors.blue.shade600, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'No events found for this category. Try selecting a different category.',
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -285,7 +473,8 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                     final date = DateFormat.yMMMMd()
                         .add_jm()
                         .format(DateTime.parse(event.startTime));
-                    final isFavorite = _isEventFavorite(event, userFavCategories);
+                    final isFavorite = _isEventFavorite(event, userFavCategories, categories);
+                    final categoryName = _getCategoryNameById(event.categoryId, categories);
 
                     return InkWell(
                       onTap: () {
@@ -395,7 +584,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                                                 fontSize: 20, fontWeight: FontWeight.bold),
                                           ),
                                         ),
-                                        if (event.categoryName != null) ...[
+                                        if (categoryName.isNotEmpty) ...[
                                           Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             decoration: BoxDecoration(
@@ -405,7 +594,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                                               borderRadius: BorderRadius.circular(12),
                                             ),
                                             child: Text(
-                                              event.categoryName,
+                                              categoryName,
                                               style: TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.w600,
@@ -538,5 +727,29 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
       },
       listener: (context, state) {},
     );
+  }
+
+  String _getFilterStatusText(int filteredCount, int favoriteCount) {
+    if (_selectedCategoryId != null && _showOnlyFavorites) {
+      return 'Favorite Events in Category';
+    } else if (_selectedCategoryId != null) {
+      return 'Events by Category';
+    } else if (_showOnlyFavorites) {
+      return 'Your Favorite Events';
+    } else {
+      return 'All Events';
+    }
+  }
+
+  String _getFilterSubtitleText(int totalEvents, int filteredCount, int favoriteCount) {
+    if (_selectedCategoryId != null && _showOnlyFavorites) {
+      return '$filteredCount favorite events in this category';
+    } else if (_selectedCategoryId != null) {
+      return '$filteredCount events in this category';
+    } else if (_showOnlyFavorites) {
+      return '$favoriteCount events match your interests';
+    } else {
+      return '$filteredCount total events • $favoriteCount favorites';
+    }
   }
 }
