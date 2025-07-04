@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                           Text(
                             'Events Near You',
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.indigo.shade800,
                             ),
