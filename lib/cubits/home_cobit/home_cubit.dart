@@ -9,6 +9,7 @@ import 'home_states.dart';
 class HomeCubit extends Cubit<HomeStates> {
   HomeCubit() : super(InitialState());
 
+
   static HomeCubit get(context) => BlocProvider.of(context);
 
   List<CategoryModel> categories = [];

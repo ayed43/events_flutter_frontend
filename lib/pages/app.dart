@@ -2,11 +2,9 @@ import 'package:demo/cubits/chat_cubit/chat_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
 import 'package:demo/models/cache_controller/cache_controller.dart';
-import 'package:demo/pages/second.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../auth/login/login_page.dart';

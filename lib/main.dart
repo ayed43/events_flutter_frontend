@@ -19,9 +19,12 @@ void main() async {
 
   await Hive.initFlutter();
   final authBox = await Hive.openBox('authBox');
+  final settingsBox = await Hive.openBox('settingsBox'); // new box for onboardingShown
+
 
   // Check if onboarding was shown before
-  final onboardingShown = authBox.get('onboardingShown', defaultValue: false);
+  final onboardingShown = settingsBox.get('onboardingShown', defaultValue: false);
+
 
   runApp(
     MultiProvider(
@@ -154,8 +157,8 @@ class _OnboardingWrapperState extends State<OnboardingWrapper> {
     return OnBoardingScreen(
       label: const Text('Get Started'),
       function: () async {
-        final authBox = Hive.box('authBox');
-        await authBox.put('onboardingShown', true);
+        final settingsBox = Hive.box('settingsBox');
+        await settingsBox.put('onboardingShown', true);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => LoginPage()),
         );

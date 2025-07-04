@@ -1,6 +1,7 @@
 import 'package:demo/constants.dart';
 import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
+import 'package:demo/models/cache_controller/cache_controller.dart';
 import 'package:demo/pages/details_page/details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,8 @@ class EventsPage extends StatelessWidget {
     return BlocConsumer<HomeCubit, HomeStates>(
       builder: (context, state) {
         final events = HomeCubit.get(context).events;
+        final categories=HomeCubit.get(context).categories;
+        List fav=[];
 
         if (events.isEmpty) {
           return RefreshIndicator(
@@ -33,6 +36,7 @@ class EventsPage extends StatelessWidget {
         return RefreshIndicator(
           onRefresh: () async {
             HomeCubit.get(context).getData();
+            CacheController().isFavOpen;
           },
           child: ListView.builder(
             physics: const BouncingScrollPhysics(),

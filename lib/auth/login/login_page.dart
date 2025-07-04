@@ -1,5 +1,6 @@
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:demo/models/cache_controller/cache_controller.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +70,9 @@ class LoginPage extends StatelessWidget {
     return Consumer<LoginController>(
       builder: (context, loginController, _) {
         return Scaffold(
-
+          floatingActionButton: FloatingActionButton(onPressed: () {
+            print(CacheController().token);
+          },),
           backgroundColor: Colors.indigo.shade50,
           body: Container(
             height: double.infinity,

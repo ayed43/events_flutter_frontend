@@ -6,6 +6,7 @@ class EventModel {
   final String endTime;
   final int cityId;
   final int categoryId;
+  final String categoryName;
   final String image;
   final double latitude;
   final double longitude;
@@ -25,6 +26,7 @@ class EventModel {
     required this.endTime,
     required this.cityId,
     required this.categoryId,
+    required this.categoryName,
     required this.image,
     required this.latitude,
     required this.longitude,
@@ -46,6 +48,7 @@ class EventModel {
       endTime: json['end_time'],
       cityId: json['city_id'],
       categoryId: json['category_id'],
+      categoryName: json['category_name'],
       image: json['image'],
       latitude: json['latitude'].toDouble(),
       longitude: json['longitude'].toDouble(),

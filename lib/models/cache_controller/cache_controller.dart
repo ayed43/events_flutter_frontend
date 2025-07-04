@@ -7,7 +7,8 @@ import '../../constants.dart';
 
 class CacheController with ChangeNotifier {
   late Box _authBox;
-
+  List userFav=[];
+  bool isFavOpen=false;
   CacheController() {
     _authBox = Hive.box('authBox');
   }
@@ -15,8 +16,33 @@ class CacheController with ChangeNotifier {
   void saveLoginData(Map<String, dynamic> user, String token) {
     _authBox.put('user', user);
     _authBox.put('token', token);
+    _authBox.put('userFav', userFav);
+    _authBox.put('isFavOpen',isFavOpen);
     notifyListeners();
   }
+
+  List<dynamic> getUserFav() {
+    final list = _authBox.get('userFav');
+    return list is List ? list : [];
+  }
+// Setter: Save selected favorite category IDs
+  void setUserFav(List<dynamic> favList) {
+    _authBox.put('userFav', favList);
+    notifyListeners();
+  }
+
+// Setter: Update isFavOpen flag
+  void setIsFavOpen(bool isOpen) {
+    _authBox.put('isFavOpen', isOpen);
+    notifyListeners();
+  }
+
+// Get isFavOpen flag directly from Hive
+  bool getIsFavOpen() {
+    final value = _authBox.get('isFavOpen');
+    return value is bool ? value : false;
+  }
+
 
   Map<String, dynamic>? get user {
     final raw = _authBox.get('user');
