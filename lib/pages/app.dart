@@ -245,15 +245,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
             builder: (context, state) {
               return Scaffold(
                 backgroundColor: const Color(0xFFFAFAFE),
-                floatingActionButton: FloatingActionButton(
-                  onPressed: () {
-                    print(CacheController().getUserFav());
-                    print(CacheController().getIsFavOpen());
-                  },
-                  backgroundColor: Colors.indigo.shade600,
-                  elevation: 8,
-                  child: const Icon(Icons.bug_report, color: Colors.white),
-                ),
+
 
                 // Enhanced AppBar
                 appBar: PreferredSize(
