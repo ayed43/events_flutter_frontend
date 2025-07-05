@@ -104,7 +104,7 @@ class BookingCubit extends Cubit<BookingStates>{
       url: '${serverUrl}/api/booking',
       bearerToken: token,
     ).then((value) {
-      print(value.data);
+      // print(value.data);
 
       if (value.data != null && value.data is Map<String, dynamic>) {
         try {

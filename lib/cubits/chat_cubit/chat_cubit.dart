@@ -14,7 +14,7 @@ class ChatCubit extends Cubit<ChatStates>{
 
   getProviders()async {
     emit(ChatLoadingProvidersState());
-   await Future.delayed(Duration(seconds: 2));
+   // await Future.delayed(Duration(seconds: 2));
     DioHelper.getData(url: '${serverUrl}/api/providers',
     bearerToken: CacheController().token
     ).then((value){
@@ -35,7 +35,7 @@ class ChatCubit extends Cubit<ChatStates>{
   sendMessage(int providerId, String title,String body)async {
 
     emit(ChatSendMessageLoading());
-    await Future.delayed(Duration(seconds: 2));
+    // await Future.delayed(Duration(seconds: 2));
     DioHelper.postData(url: '${serverUrl}/api/messages',
         bearerToken: CacheController().token,
         data: {'provider_id':providerId,'title':title,'body':body},).then((value){
@@ -57,7 +57,7 @@ class ChatCubit extends Cubit<ChatStates>{
   List <Message> messages=[];
   getMessages(int provider_id)async{
     emit(ChatGetAllMessagesLoading());
-    await Future.delayed(Duration(seconds: 2));
+    // await Future.delayed(Duration(seconds: 2));
 
     DioHelper.getData(url: '${serverUrl}/api/messages/${provider_id}',
         bearerToken:CacheController().token

@@ -102,7 +102,7 @@ class _BookingsPageState extends State<BookingsPage> {
                   child: RefreshIndicator(
                     onRefresh: () async {
                       _bookingCubit.getAllBookings();
-                      await Future.delayed(const Duration(milliseconds: 500));
+                      // await Future.delayed(const Duration(milliseconds: 500));
                     },
                     child: BookingsList(bookings: _filteredBookings(_bookingCubit.bookings)),
                   ),
