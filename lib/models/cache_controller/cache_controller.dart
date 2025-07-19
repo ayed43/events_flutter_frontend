@@ -40,7 +40,7 @@ class CacheController with ChangeNotifier {
 // Get isFavOpen flag directly from Hive
   bool getIsFavOpen() {
     final value = _authBox.get('isFavOpen');
-    return value is bool ? value : false;
+    return value is bool ? value : true;
   }
 
 

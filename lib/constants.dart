@@ -1,3 +1,3 @@
-// String serverUrl='http://10.0.2.2:8000';
-String serverUrl = 'https://events-backend-main-1ybzqx.laravel.cloud';
+String serverUrl='http://192.168.8.100:8000';
+// String serverUrl = 'https://events-backend-main-1ybzqx.laravel.cloud';
 

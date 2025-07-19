@@ -35,42 +35,42 @@ class CategoryWidget extends StatelessWidget {
               return Column(
                 children: [
                   // Rectangular Image with border radius
-                  Container(
-                    width: double.infinity,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        '$serverUrl/storage/${category.icon}',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.broken_image, size: 40),
-                        ),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   width: double.infinity,
+                  //   height: 120,
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(12),
+                  //     boxShadow: [
+                  //       BoxShadow(
+                  //         color: Colors.black12,
+                  //         blurRadius: 6,
+                  //         offset: const Offset(0, 2),
+                  //       ),
+                  //     ],
+                  //   ),
+                  //   child: ClipRRect(
+                  //     borderRadius: BorderRadius.circular(12),
+                  //     child: Image.network(
+                  //       '$serverUrl/storage/${category.icon}',
+                  //       fit: BoxFit.cover,
+                  //       errorBuilder: (context, error, stackTrace) => Container(
+                  //         color: Colors.grey[200],
+                  //         child: const Icon(Icons.broken_image, size: 40),
+                  //       ),
+                  //       loadingBuilder: (context, child, loadingProgress) {
+                  //         if (loadingProgress == null) return child;
+                  //         return Center(
+                  //           child: CircularProgressIndicator(
+                  //             value: loadingProgress.expectedTotalBytes != null
+                  //                 ? loadingProgress.cumulativeBytesLoaded /
+                  //                 loadingProgress.expectedTotalBytes!
+                  //                 : null,
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 8),
                   // Name
                   Padding(

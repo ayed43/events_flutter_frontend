@@ -59,16 +59,33 @@ class _ArchivePageState extends State<ArchivePage> {
         builder: (context, state) {
           return Scaffold(
             backgroundColor: Colors.grey.shade50,
-            appBar: AppBar(
-              title: const Text(
-                'Message Archive',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(kToolbarHeight),
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.indigo, Colors.indigoAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  title: Text(
+                    'Archive page ',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  leading: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                  ),
                 ),
               ),
-              backgroundColor: Colors.blueAccent,
-              elevation: 0,
             ),
             body: ConditionalBuilder(
               condition: state is! ChatGetAllMessagesLoading,

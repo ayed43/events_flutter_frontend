@@ -183,6 +183,7 @@ class _AppState extends State<App> with TickerProviderStateMixin {
 
   void _showModernSnackBar(String message, IconData icon, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
+
       SnackBar(
         content: Container(
           padding: const EdgeInsets.symmetric(vertical: 4),

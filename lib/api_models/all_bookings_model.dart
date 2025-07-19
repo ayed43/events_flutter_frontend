@@ -84,11 +84,12 @@ class EventResponse {
   final String image;
   final double latitude;
   final double longitude;
-  final int isActive;
+  final bool isActive;  // Changed from int to bool
   final String createdAt;
   final String updatedAt;
   final int capacity;
   final int availableSeats;
+  final int providerId;  // Added missing field from API
 
   EventResponse({
     required this.id,
@@ -106,6 +107,7 @@ class EventResponse {
     required this.updatedAt,
     required this.capacity,
     required this.availableSeats,
+    required this.providerId,
   });
 
   factory EventResponse.fromJson(Map<String, dynamic> json) {
@@ -120,11 +122,12 @@ class EventResponse {
       image: json['image'] ?? '',
       latitude: (json['latitude'] ?? 0.0).toDouble(),
       longitude: (json['longitude'] ?? 0.0).toDouble(),
-      isActive: json['is_active'] ?? 0,
+      isActive: json['is_active'] ?? false,  // Changed to handle bool
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       capacity: json['capacity'] ?? 0,
       availableSeats: json['available_seats'] ?? 0,
+      providerId: json['provider_id'] ?? 0,  // Added missing field
     );
   }
 
@@ -145,6 +148,7 @@ class EventResponse {
       'updated_at': updatedAt,
       'capacity': capacity,
       'available_seats': availableSeats,
+      'provider_id': providerId,
     };
   }
 }
