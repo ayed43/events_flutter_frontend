@@ -55,9 +55,9 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
 
   Future<void> _checkFavorites() async {
     final cache = Provider.of<CacheController>(context, listen: false);
-    final isFavOpen = cache.getIsFavOpen();
+    final hasFavoritesCompleted = cache.hasFavoritesCompleted(); // Use the completion flag
 
-    if (!isFavOpen) {
+    if (!hasFavoritesCompleted) { // Show only if favorites are NOT completed
       final homeCubit = HomeCubit.get(context);
 
       await Navigator.push(
