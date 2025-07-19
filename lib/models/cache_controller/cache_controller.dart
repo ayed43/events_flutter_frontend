@@ -15,6 +15,21 @@ class CacheController with ChangeNotifier {
   }
 
   void saveLoginData(Map<String, dynamic> user, String token) {
+    // Get the previous user ID (if any)
+    final previousUser = this.user;
+    final previousUserId = previousUser?['id'];
+    final newUserId = user['id'];
+
+    // If this is a different user (or first time), clear favorites data
+    if (previousUserId != null && previousUserId != newUserId) {
+      print('Different user detected. Clearing favorites data.');
+      _authBox.delete('favoritesCompleted');
+      _authBox.delete('userFavoriteData');
+      _authBox.delete('userFavoriteCategoryIds');
+      _authBox.delete('userFav');
+      _authBox.delete('isFavOpen');
+    }
+
     _authBox.put('user', user);
     _authBox.put('token', token);
     _authBox.put('userFav', userFav);

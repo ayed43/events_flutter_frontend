@@ -84,12 +84,12 @@ class EventResponse {
   final String image;
   final double latitude;
   final double longitude;
-  final bool isActive;  // Changed from int to bool
+  final bool isActive;
   final String createdAt;
   final String updatedAt;
   final int capacity;
   final int availableSeats;
-  final int providerId;  // Added missing field from API
+  final int providerId;
 
   EventResponse({
     required this.id,
@@ -122,12 +122,13 @@ class EventResponse {
       image: json['image'] ?? '',
       latitude: (json['latitude'] ?? 0.0).toDouble(),
       longitude: (json['longitude'] ?? 0.0).toDouble(),
-      isActive: json['is_active'] ?? false,  // Changed to handle bool
+      // FIX: Convert integer to boolean properly
+      isActive: json['is_active'] == 1 || json['is_active'] == true,
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
       capacity: json['capacity'] ?? 0,
       availableSeats: json['available_seats'] ?? 0,
-      providerId: json['provider_id'] ?? 0,  // Added missing field
+      providerId: json['provider_id'] ?? 0,
     );
   }
 

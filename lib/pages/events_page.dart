@@ -1,3 +1,4 @@
+import 'package:demo/api_models/category_model.dart';
 import 'package:demo/constants.dart';
 import 'package:demo/cubits/home_cobit/home_cubit.dart';
 import 'package:demo/cubits/home_cobit/home_states.dart';
@@ -17,7 +18,7 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
-  bool _checkedFavorites = false;
+  bool _hasCheckedFavorites = false; // Changed from _checkedFavorites to _hasCheckedFavorites
   bool _showOnlyFavorites = false;
   String? _selectedCategoryId; // null means "All Categories"
   late AnimationController _filterAnimationController;
@@ -33,6 +34,14 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     _filterAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _filterAnimationController, curve: Curves.easeInOut),
     );
+
+    // Check favorites only once when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_hasCheckedFavorites) {
+        _checkFavorites();
+        _hasCheckedFavorites = true;
+      }
+    });
   }
 
   @override
@@ -41,23 +50,29 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (!_checkedFavorites) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkFavorites();
-      });
-      _checkedFavorites = true;
-    }
-  }
+  // REMOVED: didChangeDependencies method completely
+  // This was causing the favorites check to run repeatedly
 
   Future<void> _checkFavorites() async {
     final cache = Provider.of<CacheController>(context, listen: false);
-    final hasFavoritesCompleted = cache.hasFavoritesCompleted(); // Use the completion flag
+    final categories = HomeCubit.get(context).categories ?? [];
 
-    if (!hasFavoritesCompleted) { // Show only if favorites are NOT completed
+    // Only proceed if we have categories data
+    if (categories.isEmpty) {
+      print('No categories available yet, skipping favorites check');
+      return;
+    }
+
+    // Check if user has any favorite categories (isFav: true)
+    final hasAnyFavorites = categories.any((category) => category.isFav == true);
+
+    print('Checking favorites: hasAnyFavorites=$hasAnyFavorites, hasFavoritesCompleted=${cache.hasFavoritesCompleted()}');
+
+    // Show favorites page if:
+    // 1. User hasn't completed the favorites setup, OR
+    // 2. User has no favorite categories selected
+    if (!cache.hasFavoritesCompleted() || !hasAnyFavorites) {
+      print('Showing favorites page');
       final homeCubit = HomeCubit.get(context);
 
       await Navigator.push(
@@ -70,6 +85,8 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
         ),
       );
       setState(() {});
+    } else {
+      print('Skipping favorites page - user already has favorites');
     }
   }
 
@@ -85,7 +102,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     }
   }
 
-  List<dynamic> _getFilteredEvents(List<dynamic> events, List<dynamic> userFavCategories, List<dynamic> categories) {
+  List<dynamic> _getFilteredEvents(List<dynamic> events, List<dynamic> categories) {
     List<dynamic> filteredEvents = events;
 
     // First filter by category if selected
@@ -94,18 +111,27 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
       event.categoryId.toString() == _selectedCategoryId).toList();
     }
 
-    // Then apply favorites filter
+    // Then apply favorites filter using server isFav flags
     if (_showOnlyFavorites) {
-      return filteredEvents.where((event) =>
-          userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
+      return filteredEvents.where((event) {
+        // Find the category for this event
+        final eventCategory = categories.where((cat) => cat.id == event.categoryId).firstOrNull;
+        // Return true if the category is marked as favorite
+        return eventCategory?.isFav == true;
+      }).toList();
     }
 
     // Sort events: favorites first, then others (only if no category filter)
     if (_selectedCategoryId == null) {
-      final favoriteEvents = filteredEvents.where((event) =>
-          userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
-      final otherEvents = filteredEvents.where((event) =>
-      !userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).toList();
+      final favoriteEvents = filteredEvents.where((event) {
+        final eventCategory = categories.where((cat) => cat.id == event.categoryId).firstOrNull;
+        return eventCategory?.isFav == true;
+      }).toList();
+
+      final otherEvents = filteredEvents.where((event) {
+        final eventCategory = categories.where((cat) => cat.id == event.categoryId).firstOrNull;
+        return eventCategory?.isFav != true;
+      }).toList();
 
       return [...favoriteEvents, ...otherEvents];
     }
@@ -113,8 +139,9 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
     return filteredEvents;
   }
 
-  bool _isEventFavorite(dynamic event, List<dynamic> userFavCategories, List<dynamic> categories) {
-    return userFavCategories.contains(_getCategoryNameById(event.categoryId, categories));
+  bool _isEventFavorite(dynamic event, List<dynamic> categories) {
+    final eventCategory = categories.where((cat) => cat.id == event.categoryId).firstOrNull;
+    return eventCategory?.isFav == true;
   }
 
   String _getCategoryNameById(int categoryId, List<dynamic> categories) {
@@ -129,13 +156,25 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HomeCubit, HomeStates>(
+      listener: (context, state) {
+        // Check favorites only when data is successfully loaded for the first time
+        if (state is SuccessState && !_hasCheckedFavorites) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _checkFavorites();
+            _hasCheckedFavorites = true;
+          });
+        }
+      },
       builder: (context, state) {
         final events = HomeCubit.get(context).events;
         final categories = HomeCubit.get(context).categories ?? [];
-        final userFavCategories = CacheController().getUserFav();
-        final filteredEvents = _getFilteredEvents(events, userFavCategories, categories);
-        final favoriteCount = events.where((event) =>
-            userFavCategories.contains(_getCategoryNameById(event.categoryId, categories))).length;
+        final filteredEvents = _getFilteredEvents(events, categories);
+
+        // Count favorite events using server data
+        final favoriteCount = events.where((event) {
+          final eventCategory = categories.where((cat) => cat.id == event.categoryId).firstOrNull;
+          return eventCategory?.isFav == true;
+        }).length;
 
         if (events.isEmpty) {
           return RefreshIndicator(
@@ -312,7 +351,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                                   ),
                                 ),
                                 ...categories.map<DropdownMenuItem<String>>((category) {
-                                  final isUserFavorite = userFavCategories.contains(category.name);
+                                  final isUserFavorite = category.isFav == true; // Use isFav from server
                                   return DropdownMenuItem<String>(
                                     value: category.id.toString(),
                                     child: Row(
@@ -473,7 +512,17 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                     final date = DateFormat.yMMMMd()
                         .add_jm()
                         .format(DateTime.parse(event.startTime));
-                    final isFavorite = _isEventFavorite(event, userFavCategories, categories);
+
+                    // Check if event category is favorite using server data
+                    CategoryModel? eventCategory;
+                    try {
+                      eventCategory = categories.firstWhere(
+                            (cat) => cat.id == event.categoryId,
+                      );
+                    } catch (e) {
+                      eventCategory = null;
+                    }
+                    final isFavorite = _isEventFavorite(event, categories);
                     final categoryName = _getCategoryNameById(event.categoryId, categories);
 
                     return InkWell(
@@ -633,7 +682,7 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
                                         const Icon(Icons.location_on,
                                             size: 16, color: Colors.grey),
                                         const SizedBox(width: 4),
-                                        Text('City ID: ${event.cityName}',
+                                        Text('City: ${event.cityName}',
                                             style: const TextStyle(fontSize: 14)),
                                       ],
                                     ),
@@ -725,7 +774,6 @@ class _EventsPageState extends State<EventsPage> with TickerProviderStateMixin {
           ],
         );
       },
-      listener: (context, state) {},
     );
   }
 
