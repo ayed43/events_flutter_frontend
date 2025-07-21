@@ -7,17 +7,33 @@ import '../../constants.dart';
 
 class CacheController with ChangeNotifier {
   late Box _authBox;
-  List userFav=[];
-  bool isFavOpen=false;
+  List userFav = [];
+  bool isFavOpen = false;
+
   CacheController() {
     _authBox = Hive.box('authBox');
   }
 
   void saveLoginData(Map<String, dynamic> user, String token) {
+    // Get the previous user ID (if any)
+    final previousUser = this.user;
+    final previousUserId = previousUser?['id'];
+    final newUserId = user['id'];
+
+    // If this is a different user (or first time), clear favorites data
+    if (previousUserId != null && previousUserId != newUserId) {
+      print('Different user detected. Clearing favorites data.');
+      _authBox.delete('favoritesCompleted');
+      _authBox.delete('userFavoriteData');
+      _authBox.delete('userFavoriteCategoryIds');
+      _authBox.delete('userFav');
+      _authBox.delete('isFavOpen');
+    }
+
     _authBox.put('user', user);
     _authBox.put('token', token);
     _authBox.put('userFav', userFav);
-    _authBox.put('isFavOpen',isFavOpen);
+    _authBox.put('isFavOpen', isFavOpen);
     notifyListeners();
   }
 
@@ -25,24 +41,90 @@ class CacheController with ChangeNotifier {
     final list = _authBox.get('userFav');
     return list is List ? list : [];
   }
-// Setter: Save selected favorite category IDs
+
+  // Setter: Save selected favorite category names (backward compatibility)
   void setUserFav(List<dynamic> favList) {
     _authBox.put('userFav', favList);
     notifyListeners();
   }
 
-// Setter: Update isFavOpen flag
-  void setIsFavOpen(bool isOpen) {
-    _authBox.put('isFavOpen', isOpen);
+  // NEW: Store the favorite data for server submission (category_id, user_id mapping)
+  void setUserFavoriteData(Map<String, dynamic> favoriteData) {
+    _authBox.put('userFavoriteData', favoriteData);
     notifyListeners();
   }
 
-// Get isFavOpen flag directly from Hive
-  bool getIsFavOpen() {
-    final value = _authBox.get('isFavOpen');
-    return value is bool ? value : true;
+  // NEW: Get favorite data for server submission
+  Map<String, dynamic> getUserFavoriteData() {
+    final data = _authBox.get('userFavoriteData');
+    return data is Map ? Map<String, dynamic>.from(data) : {};
   }
 
+  // NEW: Store selected category IDs
+  void setUserFavoriteCategoryIds(List<int> categoryIds) {
+    _authBox.put('userFavoriteCategoryIds', categoryIds);
+    notifyListeners();
+  }
+
+  // NEW: Get selected category IDs
+  List<int> getUserFavoriteCategoryIds() {
+    final list = _authBox.get('userFavoriteCategoryIds');
+    if (list is List) {
+      return list.map((e) => e is int ? e : int.tryParse(e.toString()) ?? 0).toList();
+    }
+    return [];
+  }
+
+  // NEW: Get favorite data as list for server API
+  List<Map<String, dynamic>> getFavoriteListForServer() {
+    final favoriteData = getUserFavoriteData();
+    return favoriteData.values.map((value) => Map<String, dynamic>.from(value)).toList();
+  }
+
+  // Setter: Update isFavOpen flag (now means favorites setup is completed)
+  void setIsFavOpen(bool isOpen) {
+    _authBox.put('isFavOpen', isOpen);
+    // Also set the completion flag when favorites are saved
+    if (isOpen) {
+      _authBox.put('favoritesCompleted', true);
+    }
+    notifyListeners();
+  }
+
+  // Get isFavOpen flag directly from Hive
+  bool getIsFavOpen() {
+    final value = _authBox.get('isFavOpen');
+    return value is bool ? value : false; // Changed default to false
+  }
+
+  // NEW: Check if user has completed favorites setup (never show again)
+  bool hasFavoritesCompleted() {
+    final value = _authBox.get('favoritesCompleted');
+    return value is bool ? value : false;
+  }
+
+  // NEW: Mark favorites as completed (prevents showing the page again)
+  void markFavoritesCompleted() {
+    _authBox.put('favoritesCompleted', true);
+    _authBox.put('isFavOpen', true);
+    notifyListeners();
+  }
+
+  // NEW: Reset favorites completion (for testing or if user wants to change preferences)
+  void resetFavoritesCompletion() {
+    _authBox.put('favoritesCompleted', false);
+    _authBox.put('isFavOpen', false);
+    notifyListeners();
+  }
+
+  // NEW: Get current user ID from stored user data
+  int getCurrentUserId() {
+    final userData = user;
+    if (userData != null && userData['id'] != null) {
+      return userData['id'] is int ? userData['id'] : int.tryParse(userData['id'].toString()) ?? 0;
+    }
+    return 0;
+  }
 
   Map<String, dynamic>? get user {
     final raw = _authBox.get('user');
@@ -134,8 +216,9 @@ class CacheController with ChangeNotifier {
 
       if (response.statusCode == 200) {
         print('Logout successful: ${response.body}');
-        // Clear all user data from Hive (including location data)
-        await _authBox.clear();
+
+        // Clear only authentication and session-specific data
+        _clearAuthData();
         notifyListeners();
       } else {
         print('Logout failed: ${response.statusCode} - ${response.body}');
@@ -143,5 +226,24 @@ class CacheController with ChangeNotifier {
     } catch (e) {
       print('Logout error: $e');
     }
+  }
+
+// Helper method to clear only authentication data
+  void _clearAuthData() {
+    // Remove authentication-related data
+    _authBox.delete('user');
+    _authBox.delete('token');
+
+    // Remove location data (since it's user-session specific)
+    _authBox.delete('myLat');
+    _authBox.delete('myLang');
+    _authBox.delete('lastLocationUpdate');
+
+    // Keep favorites data:
+    // - favoritesCompleted
+    // - userFavoriteData
+    // - userFavoriteCategoryIds
+    // - userFav
+    // - isFavOpen
   }
 }
