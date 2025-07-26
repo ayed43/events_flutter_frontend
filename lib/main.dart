@@ -168,7 +168,7 @@ class _OnboardingWrapperState extends State<OnboardingWrapper> {
       slideIndex: 0,
       statusBarColor: Colors.indigo.shade50, // softer status bar color to match bg
       startGradientColor: Colors.white,       // same as login page start
-      endGradientColor: const Color(0xFFB4FFF7), // same as login page end
+      endGradientColor:  Colors.indigo.shade400, // same as login page end
       skipStyle: const TextStyle(color: Colors.indigo), // use indigo to stand out
       pageIndicatorColorList: [
         Colors.indigo,
