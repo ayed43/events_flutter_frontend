@@ -194,24 +194,30 @@ class DetailsPage extends StatelessWidget {
                             child: Row(
 
                               children: [
-                                Icon(Icons.description, color: Colors.indigo[600]),
+
                                 const SizedBox(width: 8),
-                                const Text(
-                                  'About This Event',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'About This Event',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    Text('${event.providerName} Company',
+                                      style: TextStyle(
+                                        fontSize: 14,
+
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Spacer(),
-                                Text(event.providerName,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
+
+
                               ],
                             ),
                           ),
