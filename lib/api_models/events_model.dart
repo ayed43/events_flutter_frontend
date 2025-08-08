@@ -6,6 +6,7 @@
     final String endTime;
     final int cityId;
     final int categoryId;
+    final String providerName;
     final String image;
     final double latitude;
     final double longitude;
@@ -25,7 +26,7 @@
       required this.endTime,
       required this.cityId,
       required this.categoryId,
-
+      required this.providerName,
       required this.image,
       required this.latitude,
       required this.longitude,
@@ -47,7 +48,7 @@
         endTime: json['end_time'],
         cityId: json['city_id'],
         categoryId: json['category_id'],
-
+        providerName: json['provider_name'],
         image: json['image'],
         latitude: json['latitude'].toDouble(),
         longitude: json['longitude'].toDouble(),
