@@ -30,7 +30,7 @@ class ChatPage extends StatelessWidget {
                 },
 
                 title: Text(cubit.providers[index].name!),
-                  subtitle: Text(cubit.providers[index].companyName!),
+                  subtitle: Text(cubit.providers[index].companyName ?? 'No description'),
                   leading: Image.asset('assets/images/logo.png'),
 
                 );
